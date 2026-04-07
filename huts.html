@@ -1,0 +1,76 @@
+??? from here until ???END lines may have been inserted/deleted
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>SAC Hut Viewer</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .hut {
+      background: white;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+<h1>🏔️ SAC Huts</h1>
+<div id="huts"></div>
+
+<script>
+const url = "https://www.suissealpine.sac-cas.ch/api/1/poi/search?lang=en&output_lang=en&type=hut&limit=200";
+
+fetch(url)
+  .then(res => res.json())
+  .then(data => {
+    const container = document.getElementById("huts");
+
+    data.results.forEach(hut => {
+      const div = document.createElement("div");
+      div.className = "hut";
+
+      div.innerHTML = `
+        <div class="title">${hut.display_name}</div>
+        <div>⛰️ ${hut.altitude} m</div>
+        <div>🛏️ Sleeps: ${hut.sleeps}</div>
+        <div>🛏️ Emergency: ${hut.emergency_shelter}</div>
+        <div>🍳 Self-cook: ${hut.services.cooking_non_catered}</div>
+        <div>🍽️ Catered: ${hut.services.cooking_catered}</div>
+	<div>🍽️ Opening: <br>${renderOpening(hut.opening)}</div>
+      `;
+
+      container.appendChild(div);
+    });
+  });
+
+function renderOpening(opening) {
+  return Object.entries(opening)
+    .map(([month, value]) => {
+      const m = parseInt(month.split("_")[1]);
+      const name = new Date(0, m - 1).toLocaleString('en', { month: 'short' });
+
+  switch (value) {
+    case 0: return "closed";
+    case 1: return "open (unstaffed)";
+    case 2: return "open (staffed)";
+    default: return "unknown";
+   }
+ })
+ .join("<br>");
+}
+</script>
+
+</body>
+</html>
+???END
