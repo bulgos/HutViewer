@@ -1,6 +1,12 @@
 const URL = "https://www.suissealpine.sac-cas.ch/api/1/poi/search?lang=en&output_lang=en&type=hut&limit=200";
 
 let huts = [];
+const filterIds = [
+  "selfCookYes",
+  "selfCookNo",
+  "cateredYes",
+  "cateredNo"
+];
 
 fetch(URL)
   .then(res => res.json())
@@ -9,17 +15,44 @@ fetch(URL)
     render();
   });
 
-document.getElementById("noSelfCook").addEventListener("change", render);
+filterIds.forEach(id => {
+  document.getElementById(id).addEventListener("change", render);
+});
 
 function render() {
   const container = document.getElementById("huts");
   container.innerHTML = "";
 
-  const hideSelfCook = document.getElementById("noSelfCook").checked;
+  const filters = {
+    selfCookYes: document.getElementById("selfCookYes").checked,
+    selfCookNo: document.getElementById("selfCookNo").checked,
+    cateredYes: document.getElementById("cateredYes").checked,
+    cateredNo: document.getElementById("cateredNo").checked
+  };
 
   huts
-    .filter(h => !hideSelfCook || !h.services.cooking_non_catered)
+    .filter(h => matchesFilters(h, filters))
     .forEach(renderHut);
+}
+
+function matchesFilters(hut, filters) {
+  return matchesBooleanFilter(
+    hut.services.cooking_non_catered,
+    filters.selfCookYes,
+    filters.selfCookNo
+  ) && matchesBooleanFilter(
+    hut.services.cooking_catered,
+    filters.cateredYes,
+    filters.cateredNo
+  );
+}
+
+function matchesBooleanFilter(value, includeTrue, includeFalse) {
+  if (value) {
+    return includeTrue;
+  }
+
+  return includeFalse;
 }
 
 function renderHut(hut) {

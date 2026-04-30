@@ -10,10 +10,29 @@
 <h1>🏔️ SAC Huts</h1>
 
 <div class="controls">
-  <label>
-    <input type="checkbox" id="noSelfCook">
-    Hide self-cooking huts
-  </label>
+  <div class="filter-group">
+    <div class="filter-title">Self-cooking</div>
+    <label>
+      <input type="checkbox" id="selfCookYes" checked>
+      Self-cook
+    </label>
+    <label>
+      <input type="checkbox" id="selfCookNo" checked>
+      No self-cook
+    </label>
+  </div>
+
+  <div class="filter-group">
+    <div class="filter-title">Catering</div>
+    <label>
+      <input type="checkbox" id="cateredYes" checked>
+      Catered
+    </label>
+    <label>
+      <input type="checkbox" id="cateredNo" checked>
+      Not catered
+    </label>
+  </div>
 </div>
 
 <div id="huts" class="grid"></div>
