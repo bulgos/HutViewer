@@ -57,42 +57,37 @@
 }
 
 #center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
-#next-steps {
+.hut-sidebar {
+  position: fixed;
+  z-index: 1000;
+  right: 8px;
+  top: 8px;
+  box-sizing: border-box;
+  width: min(340px, calc(100vw - 16px));
+  max-height: min(82vh, 600px);
   display: flex;
-  border-top: 1px solid var(--border);
+  flex-direction: column;
+  padding: 8px;
+  border-radius: 12px;
   text-align: left;
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  /* Solid surface — backdrop-filter was causing invisible text in WebKit over the map */
+  background: var(--bg);
+}
 
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+.hut-sidebar .hut-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: none;
 }
 
 #docs {
