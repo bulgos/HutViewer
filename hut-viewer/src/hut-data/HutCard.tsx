@@ -35,7 +35,23 @@ const SUITABILITY_LABELS: Record<string, string> = {
   ski_snowboard_tour: 'Ski / snowboard tours',
 };
 
-export const HutCard: FC<{ hut: HutType }> = ({ hut }) => {
+export type HutCardProps = {
+  hut: HutType;
+  detailsOpen: boolean;
+  onDetailsOpenChange: (open: boolean) => void;
+  isHighlighted: boolean;
+  onHoverStart: () => void;
+  onHoverEnd: () => void;
+};
+
+export const HutCard: FC<HutCardProps> = ({
+  hut,
+  detailsOpen,
+  onDetailsOpenChange,
+  isHighlighted,
+  onHoverStart,
+  onHoverEnd,
+}) => {
   const services = Object.entries(hut.services).filter(([, v]) => v);
   const suitable = Object.entries(hut.suitable).filter(([, v]) => v);
 
@@ -46,7 +62,12 @@ export const HutCard: FC<{ hut: HutType }> = ({ hut }) => {
     currentOpening !== undefined ? OPENING_LABEL[currentOpening] : 'Unknown';
 
   return (
-    <article className="hut-card">
+    <article
+      id={`hut-card-${hut.id}`}
+      className={`hut-card${isHighlighted ? ' hut-card--highlighted' : ''}`}
+      onMouseEnter={onHoverStart}
+      onMouseLeave={onHoverEnd}
+    >
       <header className="hut-card__header">
         <div className="hut-card__header-top">
           <h3 className="hut-card__title">{hut.geographical_name}</h3>
@@ -73,7 +94,11 @@ export const HutCard: FC<{ hut: HutType }> = ({ hut }) => {
         </div>
       </header>
 
-      <details className="hut-card__details">
+      <details
+        className="hut-card__details"
+        open={detailsOpen}
+        onToggle={(e) => onDetailsOpenChange(e.currentTarget.open)}
+      >
         <summary className="hut-card__summary">
           <span className="hut-card__summary-chevron" aria-hidden />
           More details
