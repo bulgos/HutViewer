@@ -113,7 +113,9 @@ export const HutCard: FC<HutCardProps> = ({
                   className={`hut-card__month hut-card__month--${opening}`}
                   title={`${CALENDAR_MONTH_SHORT[i] ?? `M${i + 1}`}: ${opening}`}
                   role="listitem"
-                />
+                >
+                  {CALENDAR_MONTH_SHORT[i]}
+                </span>
               ))}
             </div>
             <div className="hut-card__legend" aria-hidden>

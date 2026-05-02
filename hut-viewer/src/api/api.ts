@@ -1,6 +1,6 @@
 import type { OpeningType, HutType } from '../hut-data/HutType';
 
-const URL = 'https://www.suissealpine.sac-cas.ch/api/1/poi/search?lang=en&output_lang=en&type=hut&limit=200';
+const URL = 'https://www.suissealpine.sac-cas.ch/api/1/poi/search?lang=en&output_lang=en&type=hut&limit=1000';
 
 const ExampleHut = {
   display_name: 'Aarbiwak SAC',

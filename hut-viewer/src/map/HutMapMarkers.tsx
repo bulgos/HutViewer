@@ -32,7 +32,7 @@ export function HutMapMarkers({ huts, hoveredHutId, onMarkerSelect }: Props) {
             pathOptions={pathOptions}
             eventHandlers={{
               click: () => {
-                map.flyTo(hut.location, SELECT_ZOOM);
+                map.flyTo(hut.location, SELECT_ZOOM, { animate: false });
                 onMarkerSelect(hut);
               },
             }}

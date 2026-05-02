@@ -30,6 +30,10 @@ function App() {
     setDetailsOpenByHutId((prev) => ({ ...prev, [hutId]: open }));
   }, []);
 
+  useEffect(() => {
+    console.log(huts);
+  }, [huts]);
+
   return (
     <section id="center">
       <MapContainer style={{ height: '100%', width: '100%' }} center={[47, 8]} zoom={7} scrollWheelZoom={false}>

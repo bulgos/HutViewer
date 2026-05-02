@@ -56,7 +56,7 @@ const MARKER_PALETTE: Record<OpeningVisualKind, { fill: string; stroke: string }
   closed: { fill: '#94a3b8', stroke: '#64748b' },
   open: { fill: '#22c55e', stroke: '#15803d' },
   serviced: { fill: '#aa3bff', stroke: '#7c3aed' },
-  unknown: { fill: '#a8a29e', stroke: '#78716c' },
+  unknown: { fill: '#ff6666', stroke: '#ff0000' }
 };
 
 export function openingMarkerPathOptions(opening: OpeningType | undefined): PathOptions {
