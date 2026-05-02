@@ -1,27 +1,13 @@
 import type { FC } from 'react';
-import type { HutType, OpeningType } from './HutType';
+import type { HutType } from './HutType';
+import {
+  CALENDAR_MONTH_SHORT,
+  OPENING_LABEL,
+  calendarMonthIndex,
+  currentMonthOpening,
+  openingVisualKind,
+} from './openingStatus';
 import './HutCard.css';
-
-const MONTHS = [
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-] as const;
-
-const OPENING_LABEL: Record<OpeningType, string> = {
-  closed: 'Closed',
-  open: 'Open',
-  serviced: 'Serviced',
-};
 
 const SERVICE_LABELS: Record<string, string> = {
   drinks: 'Drinks',
@@ -53,8 +39,9 @@ export const HutCard: FC<{ hut: HutType }> = ({ hut }) => {
   const services = Object.entries(hut.services).filter(([, v]) => v);
   const suitable = Object.entries(hut.suitable).filter(([, v]) => v);
 
-  const monthIndex = new Date().getMonth();
-  const currentOpening = hut.openings[monthIndex];
+  const now = new Date();
+  const monthIndex = calendarMonthIndex(now);
+  const currentOpening = currentMonthOpening(hut, now);
   const openingLabel =
     currentOpening !== undefined ? OPENING_LABEL[currentOpening] : 'Unknown';
 
@@ -74,10 +61,10 @@ export const HutCard: FC<{ hut: HutType }> = ({ hut }) => {
             <strong>{hut.sleeps}</strong> beds
           </span>
           <span
-            className={`hut-card__now hut-card__now--${currentOpening ?? 'unknown'}`}
-            title={`Opening status in ${MONTHS[monthIndex] ?? 'this month'}`}
+            className={`hut-card__now hut-card__now--${openingVisualKind(currentOpening)}`}
+            title={`Opening status in ${CALENDAR_MONTH_SHORT[monthIndex] ?? 'this month'}`}
           >
-            <span className="hut-card__now-month">{MONTHS[monthIndex]}</span>
+            <span className="hut-card__now-month">{CALENDAR_MONTH_SHORT[monthIndex]}</span>
             <span className="hut-card__now-sep" aria-hidden>
               ·
             </span>
@@ -99,7 +86,7 @@ export const HutCard: FC<{ hut: HutType }> = ({ hut }) => {
                 <span
                   key={`${hut.id}-${i}`}
                   className={`hut-card__month hut-card__month--${opening}`}
-                  title={`${MONTHS[i] ?? `M${i + 1}`}: ${opening}`}
+                  title={`${CALENDAR_MONTH_SHORT[i] ?? `M${i + 1}`}: ${opening}`}
                   role="listitem"
                 />
               ))}
