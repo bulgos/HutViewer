@@ -9,34 +9,9 @@ import {
 } from './openingStatus';
 import './HutCard.css';
 import type { HutAvailability } from './hut-availability';
-import { availabilityLevel, formatAvailabilityStatus, getAvailabilityStatus } from './hut-availability';
+import { availabilityLevel, getAvailabilityStatus } from './hut-availability';
 import { fetchAvailability } from '../api/get-hut-availability/api';
-
-const SERVICE_LABELS: Record<string, string> = {
-  drinks: 'Drinks',
-  internet: 'Internet',
-  not_paid: 'Members / no fee',
-  css_rebate: 'CSS rebate',
-  half_board: 'Half board',
-  plain_meals: 'Meals',
-  family_rooms: 'Family rooms',
-  payment_mobile: 'Mobile pay',
-  cooking_catered: 'Catered cooking',
-  dogs_on_request: 'Dogs on request',
-  payment_creditcard: 'Card payment',
-  cooking_non_catered: 'Self-catering kitchen',
-  separable_group_rooms: 'Group rooms'
-};
-
-const SUITABILITY_LABELS: Record<string, string> = {
-  family: 'Families',
-  climbing: 'Climbing',
-  alpine_tour: 'Alpine tours',
-  via_ferrata: 'Via ferrata',
-  climbing_kids: 'Kids climbing',
-  mountain_hiking: 'Hiking',
-  ski_snowboard_tour: 'Ski / snowboard tours'
-};
+import { SERVICE_LABELS, SUITABILITY_LABELS } from './filter-labels';
 
 export type HutCardProps = {
   hut: HutType;
@@ -218,7 +193,7 @@ export const HutCard: FC<HutCardProps> = ({
               ) : (
                 services.map(([key]) => (
                   <span key={key} className="hut-card__chip">
-                    {SERVICE_LABELS[key] ?? key.replace(/_/g, ' ')}
+                    {SERVICE_LABELS[key as keyof typeof SERVICE_LABELS] ?? key.replace(/_/g, ' ')}
                   </span>
                 ))
               )}
@@ -233,7 +208,8 @@ export const HutCard: FC<HutCardProps> = ({
               ) : (
                 suitable.map(([key]) => (
                   <span key={key} className="hut-card__chip">
-                    {SUITABILITY_LABELS[key] ?? key.replace(/_/g, ' ')}
+                    {SUITABILITY_LABELS[key as keyof typeof SUITABILITY_LABELS] ??
+                      key.replace(/_/g, ' ')}
                   </span>
                 ))
               )}

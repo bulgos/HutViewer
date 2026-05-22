@@ -19,6 +19,9 @@ export const HutList: FC<HutListProps> = ({
 }) => {
   return (
     <div className="hut-list">
+      {huts.length === 0 && (
+        <p className="hut-list__empty">No huts match the current filters.</p>
+      )}
       {huts.map((hut) => (
         <HutCard
           key={hut.id}

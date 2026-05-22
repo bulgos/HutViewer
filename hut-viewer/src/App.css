@@ -64,30 +64,116 @@
   bottom: 0;
 }
 
-.hut-sidebar {
+.map-draw-hint {
+  position: fixed;
+  z-index: 1001;
+  left: 50%;
+  top: 12px;
+  transform: translateX(-50%);
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-h);
+  background: var(--bg);
+  border: 1px solid var(--accent-border);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+}
+
+.map-draw-hint--warn {
+  border-color: rgba(245, 158, 11, 0.55);
+  background: rgba(251, 191, 36, 0.12);
+}
+
+.hut-panels {
   position: fixed;
   z-index: 1000;
   right: 8px;
   top: 8px;
+  bottom: 8px;
+  width: min(720px, calc(100vw - 16px));
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.hut-panel {
   box-sizing: border-box;
-  width: min(340px, calc(100vw - 16px));
-  max-height: min(82vh, 600px);
   display: flex;
   flex-direction: column;
+  height: 100%;
   padding: 8px;
   border-radius: 12px;
   text-align: left;
   color: var(--text);
   border: 1px solid var(--border);
   box-shadow: var(--shadow);
-  /* Solid surface — backdrop-filter was causing invisible text in WebKit over the map */
   background: var(--bg);
+  pointer-events: auto;
+  min-height: 0;
+  min-width: 0;
 }
 
-.hut-sidebar .hut-list {
+.hut-panel--results {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.hut-panel--filters {
+  flex: 0 0 min(300px, 38vw);
+  max-width: 340px;
+  overflow: hidden;
+}
+
+.hut-results__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-bottom: 8px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+
+.hut-results__title {
+  margin: 0;
+  font-family: var(--heading);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-h);
+}
+
+.hut-results__count {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text);
+}
+
+.hut-panel--results .hut-list {
   flex: 1 1 auto;
   min-height: 0;
   max-height: none;
+}
+
+@media (max-width: 720px) {
+  .hut-panels {
+    flex-direction: column;
+    width: min(360px, calc(100vw - 16px));
+  }
+
+  .hut-panel--filters {
+    flex: 0 0 auto;
+    max-width: none;
+    max-height: 42vh;
+  }
+
+  .hut-panel--results {
+    flex: 1 1 0;
+  }
 }
 
 #docs {
