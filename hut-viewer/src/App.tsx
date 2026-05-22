@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import './App.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import { fetchAllInformation } from './api/api';
+import { fetchAllInformation } from './api/get-hut-data/api';
 import { type HutType } from './hut-data/HutType';
 import { HutList } from './hut-data/HutList';
 import { HutMapMarkers } from './map/HutMapMarkers';
@@ -29,10 +29,6 @@ function App() {
   const handleDetailsOpenChange = useCallback((hutId: number, open: boolean) => {
     setDetailsOpenByHutId((prev) => ({ ...prev, [hutId]: open }));
   }, []);
-
-  useEffect(() => {
-    console.log(huts);
-  }, [huts]);
 
   return (
     <section id="center">

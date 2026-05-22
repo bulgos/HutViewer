@@ -1,13 +1,16 @@
-import type { FC } from 'react';
+import { useEffect, useState, type FC } from 'react';
 import type { HutType } from './HutType';
 import {
   CALENDAR_MONTH_SHORT,
   OPENING_LABEL,
   calendarMonthIndex,
   currentMonthOpening,
-  openingVisualKind,
+  openingVisualKind
 } from './openingStatus';
 import './HutCard.css';
+import type { HutAvailability } from './hut-availability';
+import { availabilityLevel, formatAvailabilityStatus, getAvailabilityStatus } from './hut-availability';
+import { fetchAvailability } from '../api/get-hut-availability/api';
 
 const SERVICE_LABELS: Record<string, string> = {
   drinks: 'Drinks',
@@ -22,7 +25,7 @@ const SERVICE_LABELS: Record<string, string> = {
   dogs_on_request: 'Dogs on request',
   payment_creditcard: 'Card payment',
   cooking_non_catered: 'Self-catering kitchen',
-  separable_group_rooms: 'Group rooms',
+  separable_group_rooms: 'Group rooms'
 };
 
 const SUITABILITY_LABELS: Record<string, string> = {
@@ -32,7 +35,7 @@ const SUITABILITY_LABELS: Record<string, string> = {
   via_ferrata: 'Via ferrata',
   climbing_kids: 'Kids climbing',
   mountain_hiking: 'Hiking',
-  ski_snowboard_tour: 'Ski / snowboard tours',
+  ski_snowboard_tour: 'Ski / snowboard tours'
 };
 
 export type HutCardProps = {
@@ -50,16 +53,55 @@ export const HutCard: FC<HutCardProps> = ({
   onDetailsOpenChange,
   isHighlighted,
   onHoverStart,
-  onHoverEnd,
+  onHoverEnd
 }) => {
   const services = Object.entries(hut.services).filter(([, v]) => v);
   const suitable = Object.entries(hut.suitable).filter(([, v]) => v);
+  const [availability, setAvailability] = useState<HutAvailability[]>([]);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState(false);
+  const [availabilityFetched, setAvailabilityFetched] = useState(false);
 
   const now = new Date();
   const monthIndex = calendarMonthIndex(now);
   const currentOpening = currentMonthOpening(hut, now);
-  const openingLabel =
-    currentOpening !== undefined ? OPENING_LABEL[currentOpening] : 'Unknown';
+  const openingLabel = currentOpening !== undefined ? OPENING_LABEL[currentOpening] : 'Unknown';
+
+  useEffect(() => {
+    setAvailability([]);
+    setAvailabilityLoading(false);
+    setAvailabilityError(false);
+    setAvailabilityFetched(false);
+  }, [hut.id]);
+
+  useEffect(() => {
+    if (!detailsOpen || availabilityFetched || hut.is_private) return;
+
+    let cancelled = false;
+    setAvailabilityLoading(true);
+    setAvailabilityError(false);
+
+    fetchAvailability(hut.id)
+      .then((data) => {
+        if (!cancelled) setAvailability(data);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAvailabilityError(true);
+          setAvailability([]);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setAvailabilityLoading(false);
+          setAvailabilityFetched(true);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [detailsOpen, hut.id, availabilityFetched]);
 
   return (
     <article
@@ -102,8 +144,45 @@ export const HutCard: FC<HutCardProps> = ({
         <summary className="hut-card__summary">
           <span className="hut-card__summary-chevron" aria-hidden />
           More details
+          <span>{hut.id}</span>
         </summary>
         <div className="hut-card__details-inner">
+          {hut.is_private ? (
+            <span className="hut-card__chip hut-card__chip--muted">Private hut</span>
+          ) : (
+            <div className="hut-card__availability-wrap">
+              <span className="hut-card__label">Availability</span>
+              {availabilityLoading && <span className="hut-card__chip hut-card__chip--muted">Loading…</span>}
+              {availabilityError && !availabilityLoading && (
+                <span className="hut-card__chip hut-card__chip--muted">Could not load</span>
+              )}
+              {!availabilityLoading && !availabilityError && availability.length === 0 && availabilityFetched && (
+                <span className="hut-card__chip hut-card__chip--muted">No dates listed</span>
+              )}
+              {!availabilityLoading && !availabilityError && availability.length > 0 && (
+                <ul className="hut-card__availability" aria-label="Bed availability by date">
+                  {availability.map((day) => {
+                    const availabilityPercentage = availabilityLevel(day.freeBeds, day.totalSleepingPlaces);
+                    const status = getAvailabilityStatus(availabilityPercentage);
+                    return (
+                      <li key={day.date.toISOString()} className="hut-card__availability-row">
+                        <span className="hut-card__availability-date">{day.dateFormatted}</span>
+                        <span className="hut-card__availability-beds">
+                          <strong>{day.freeBeds}</strong>
+                          <span className="hut-card__availability-beds-sep">/</span>
+                          {day.totalSleepingPlaces}
+                        </span>
+                        <span className={`hut-card__availability-status hut-card__availability-status--${status}`}>
+                          {availabilityPercentage.toFixed(1)}%
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          )}
+
           <div className="hut-card__months-wrap">
             <span className="hut-card__label">Season</span>
             <div className="hut-card__months" role="list" aria-label="Months open or serviced">
