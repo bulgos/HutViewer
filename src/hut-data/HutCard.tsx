@@ -125,21 +125,10 @@ export const HutCard: FC<HutCardProps> = ({
             title="Copy API ID to clipboard"
             onClick={(e) => {
               e.stopPropagation();
-              navigator.clipboard.writeText(hut.apiId.toString());
+              navigator.clipboard.writeText(JSON.stringify(hut.rawData));
             }}
           >
-            API ID
-          </button>
-          <button
-            type="button"
-            className="hut-card__copy-id"
-            title="Copy SAC ID to clipboard"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigator.clipboard.writeText(hut.id.toString());
-            }}
-          >
-            SAC ID
+            API Data
           </button>
         </summary>
         <div className="hut-card__details-inner">

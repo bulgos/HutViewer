@@ -27,10 +27,12 @@ export const mapDataToHutType = (data: HutTypeApi): HutType => ({
   location: swissToWgs84(...data.geom.coordinates),
   geographical_name: data.geographical_name,
   sleeps: data.sleeps,
-  id: data.sac_id,
+  id: data.id,
+  sacId: data.sac_id,
   apiId: data.hrs_id,
   is_private: data.is_private,
   openings: mapOpeningToOpeningType(data.opening),
   services: data.services,
-  suitable: data.suitable
+  suitable: data.suitable,
+  rawData: data
 });
