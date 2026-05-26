@@ -41,8 +41,6 @@ export const HutFilters: FC<Props> = ({
 
   return (
     <section className="hut-filters" aria-label="Hut filters">
-      <h2 className="hut-filters__title">Filters</h2>
-
       <fieldset className="hut-filters__group">
         <legend className="hut-filters__legend">Map area</legend>
         <div className="hut-filters__row">

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -11,6 +11,8 @@ import { type HutType } from './hut-data/HutType';
 import { HutList } from './hut-data/HutList';
 import { AreaSelector } from './map/AreaSelector';
 import { HutMapMarkers } from './map/HutMapMarkers';
+import { MapFlyToHut } from './map/MapFlyToHut';
+import { useRightPanelWidth } from './map/useRightPanelWidth';
 
 function App() {
   const [huts, setHuts] = useState<HutType[]>([]);
@@ -19,6 +21,12 @@ function App() {
   const [areaDrawHint, setAreaDrawHint] = useState<string | null>(null);
   const [hoveredHutId, setHoveredHutId] = useState<number | null>(null);
   const [detailsOpenByHutId, setDetailsOpenByHutId] = useState<Record<number, boolean>>({});
+  const [resultsOpen, setResultsOpen] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(true);
+  const [mapFocusHut, setMapFocusHut] = useState<HutType | null>(null);
+
+  const panelsRef = useRef<HTMLDivElement>(null);
+  const mapPaddingRight = useRightPanelWidth(panelsRef);
 
   const hutsBeforeAvailability = useMemo(
     () => applyHutFiltersWithoutAvailability(huts, filters),
@@ -41,6 +49,8 @@ function App() {
   }, []);
 
   const handleMarkerSelect = useCallback((hut: HutType) => {
+    setResultsOpen(true);
+    setMapFocusHut(hut);
     setDetailsOpenByHutId((prev) => ({ ...prev, [hut.id]: true }));
     requestAnimationFrame(() => {
       document.getElementById(`hut-card-${hut.id}`)?.scrollIntoView({
@@ -75,6 +85,7 @@ function App() {
             setAreaDrawHint('Area too small — drag a larger rectangle on the map.')
           }
         />
+        <MapFlyToHut hut={mapFocusHut} paddingRightPx={mapPaddingRight} />
         <HutMapMarkers
           huts={filteredHuts}
           hoveredHutId={hoveredHutId}
@@ -91,40 +102,73 @@ function App() {
           {areaDrawHint}
         </div>
       )}
-      <div className="hut-panels">
-        <aside className="hut-panel hut-panel--results" aria-label="Hut results">
-          <header className="hut-results__head">
-            <h2 className="hut-results__title">Results</h2>
-            <span className="hut-results__count">
+      <div className="hut-panels" ref={panelsRef}>
+        <aside
+          className={`hut-panel hut-panel--filters${filtersOpen ? '' : ' hut-panel--collapsed'}`}
+          aria-label="Hut filters"
+        >
+          <div className="hut-panel__chrome">
+            <button
+              type="button"
+              className="hut-panel__toggle"
+              onClick={() => setFiltersOpen((open) => !open)}
+              aria-expanded={filtersOpen}
+              aria-label={filtersOpen ? 'Collapse filters' : 'Expand filters'}
+              title={filtersOpen ? 'Collapse filters' : 'Expand filters'}
+            >
+              {filtersOpen ? '▲' : '▼'}
+            </button>
+            <span className="hut-panel__rail-label">Filters</span>
+          </div>
+          {filtersOpen && (
+            <HutFilters
+              filters={filters}
+              onChange={setFilters}
+              drawAreaActive={drawAreaActive}
+              onDrawAreaToggle={() => {
+                setAreaDrawHint(null);
+                setDrawAreaActive((v) => !v);
+              }}
+              onClearArea={() => setFilters((f) => ({ ...f, areaBounds: null }))}
+              availabilityLoading={needAvailability && availabilityLoading}
+              availabilityTargetCount={hutsBeforeAvailability.filter((h) => !h.is_private).length}
+              onResetAll={() => {
+                setFilters(DEFAULT_HUT_FILTERS);
+                setDrawAreaActive(false);
+                setAreaDrawHint(null);
+              }}
+            />
+          )}
+        </aside>
+        <aside
+          className={`hut-panel hut-panel--results${resultsOpen ? '' : ' hut-panel--collapsed'}`}
+          aria-label="Hut results"
+        >
+          <div className="hut-panel__chrome">
+            <button
+              type="button"
+              className="hut-panel__toggle"
+              onClick={() => setResultsOpen((open) => !open)}
+              aria-expanded={resultsOpen}
+              aria-label={resultsOpen ? 'Collapse results' : 'Expand results'}
+              title={resultsOpen ? 'Collapse results' : 'Expand results'}
+            >
+              {resultsOpen ? '▲' : '▼'}
+            </button>
+            <span className="hut-panel__rail-label">Results</span>
+            <span className="hut-panel__rail-count">
               {filteredHuts.length} / {huts.length}
             </span>
-          </header>
-          <HutList
-            huts={filteredHuts}
-            hoveredHutId={hoveredHutId}
-            onHoverHut={setHoveredHutId}
-            detailsOpenByHutId={detailsOpenByHutId}
-            onDetailsOpenChange={handleDetailsOpenChange}
-          />
-        </aside>
-        <aside className="hut-panel hut-panel--filters" aria-label="Hut filters">
-          <HutFilters
-            filters={filters}
-            onChange={setFilters}
-            drawAreaActive={drawAreaActive}
-            onDrawAreaToggle={() => {
-              setAreaDrawHint(null);
-              setDrawAreaActive((v) => !v);
-            }}
-            onClearArea={() => setFilters((f) => ({ ...f, areaBounds: null }))}
-            availabilityLoading={needAvailability && availabilityLoading}
-            availabilityTargetCount={hutsBeforeAvailability.filter((h) => !h.is_private).length}
-            onResetAll={() => {
-              setFilters(DEFAULT_HUT_FILTERS);
-              setDrawAreaActive(false);
-              setAreaDrawHint(null);
-            }}
-          />
+          </div>
+          {resultsOpen && (
+            <HutList
+              huts={filteredHuts}
+              hoveredHutId={hoveredHutId}
+              onHoverHut={setHoveredHutId}
+              detailsOpenByHutId={detailsOpenByHutId}
+              onDetailsOpenChange={handleDetailsOpenChange}
+            />
+          )}
         </aside>
       </div>
     </section>
