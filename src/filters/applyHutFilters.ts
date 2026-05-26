@@ -1,4 +1,5 @@
 import L from 'leaflet';
+import { isAvailabilityApiEnabled } from '../api/get-hut-availability/config';
 import type { HutAvailability } from '../hut-data/hut-availability';
 import type { HutType } from '../hut-data/HutType';
 import { pickAvailabilityDay } from './pickAvailabilityDay';
@@ -80,7 +81,8 @@ export function applyHutFilters(
   filters: HutFilterState,
   availabilityByHutId: Record<number, HutAvailability[]>,
 ): HutType[] {
-  return applyHutFiltersWithoutAvailability(huts, filters).filter((hut) =>
-    hutMatchesAvailability(hut, filters, availabilityByHutId),
-  );
+  return applyHutFiltersWithoutAvailability(huts, filters).filter((hut) => {
+    if (!isAvailabilityApiEnabled()) return true;
+    return hutMatchesAvailability(hut, filters, availabilityByHutId);
+  });
 }

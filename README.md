@@ -31,4 +31,4 @@ You can also run the workflow manually from the **Actions** tab (**Deploy to Git
 ### Production notes
 
 - Asset paths use the repository name as the Vite `base` path (set automatically in CI via `GITHUB_REPOSITORY`).
-- Availability calls the hut-reservation API directly in production builds. If the browser blocks those requests (CORS), availability filters and hut details will not load on GitHub Pages until a same-origin proxy is added.
+- **Bed availability** (filters and hut details) is disabled on GitHub Pages. The hut-reservation API blocks cross-origin browser requests; availability only works locally via the Vite dev proxy (`npm run dev`).

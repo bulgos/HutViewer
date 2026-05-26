@@ -17,6 +17,7 @@ type Props = {
   onDrawAreaToggle: () => void;
   onClearArea: () => void;
   availabilityLoading: boolean;
+  availabilityEnabled: boolean;
   availabilityTargetCount: number;
   onResetAll: () => void;
 };
@@ -32,6 +33,7 @@ export const HutFilters: FC<Props> = ({
   onDrawAreaToggle,
   onClearArea,
   availabilityLoading,
+  availabilityEnabled,
   availabilityTargetCount,
   onResetAll,
 }) => {
@@ -64,9 +66,9 @@ export const HutFilters: FC<Props> = ({
         </p>
       </fieldset>
 
-      <fieldset className="hut-filters__group">
+      <fieldset className="hut-filters__group" disabled={!availabilityEnabled}>
         <legend className="hut-filters__legend">Availability (next date)</legend>
-        {availabilityLoading && (
+        {availabilityEnabled && availabilityLoading && (
           <p className="hut-filters__hint hut-filters__hint--loading">Loading availability…</p>
         )}
         <label className="hut-filters__radio">
@@ -107,8 +109,14 @@ export const HutFilters: FC<Props> = ({
           Completely free (all beds available)
         </label>
         <p className="hut-filters__hint">
-          Club huts only. Checks up to {availabilityTargetCount} huts already matching map /
-          service / activity filters.
+          {availabilityEnabled ? (
+            <>
+              Club huts only. Checks up to {availabilityTargetCount} huts already matching map /
+              service / activity filters.
+            </>
+          ) : (
+            <>Bed availability filters only work when running locally (<code>npm run dev</code>).</>
+          )}
         </p>
       </fieldset>
 

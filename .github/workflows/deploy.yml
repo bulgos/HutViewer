@@ -32,8 +32,6 @@ jobs:
 
       - name: Build
         run: npm run build
-        env:
-          VITE_HUT_RESERVATION_API_BASE: https://www.hut-reservation.org
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

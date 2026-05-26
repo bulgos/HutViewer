@@ -3,6 +3,7 @@ import './App.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { fetchAllInformation } from './api/get-hut-data/api';
+import { isAvailabilityApiEnabled } from './api/get-hut-availability/api';
 import { applyHutFilters, applyHutFiltersWithoutAvailability } from './filters/applyHutFilters';
 import { HutFilters } from './filters/HutFilters';
 import { DEFAULT_HUT_FILTERS, filtersNeedAvailability, type HutFilterState } from './filters/types';
@@ -34,9 +35,10 @@ function App() {
   );
 
   const needAvailability = filtersNeedAvailability(filters);
+  const availabilityApiEnabled = isAvailabilityApiEnabled();
   const { availabilityByHutId, loading: availabilityLoading } = useAvailabilityPrefetch(
     hutsBeforeAvailability,
-    needAvailability,
+    needAvailability && availabilityApiEnabled,
   );
 
   const filteredHuts = useMemo(
@@ -130,7 +132,8 @@ function App() {
                 setDrawAreaActive((v) => !v);
               }}
               onClearArea={() => setFilters((f) => ({ ...f, areaBounds: null }))}
-              availabilityLoading={needAvailability && availabilityLoading}
+              availabilityLoading={needAvailability && availabilityApiEnabled && availabilityLoading}
+              availabilityEnabled={availabilityApiEnabled}
               availabilityTargetCount={hutsBeforeAvailability.filter((h) => !h.is_private).length}
               onResetAll={() => {
                 setFilters(DEFAULT_HUT_FILTERS);
