@@ -29,6 +29,7 @@ export type HutType = {
   geographical_name: string;
   sleeps: number;
   id: number;
+  apiId: number;
   is_private: boolean;
   openings: OpeningType[]; // should have 12 of them
   services: ServiceMap;

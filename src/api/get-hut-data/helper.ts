@@ -28,6 +28,7 @@ export const mapDataToHutType = (data: HutTypeApi): HutType => ({
   geographical_name: data.geographical_name,
   sleeps: data.sleeps,
   id: data.sac_id,
+  apiId: data.hrs_id,
   is_private: data.is_private,
   openings: mapOpeningToOpeningType(data.opening),
   services: data.services,

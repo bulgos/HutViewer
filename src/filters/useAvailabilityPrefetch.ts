@@ -51,7 +51,7 @@ export function useAvailabilityPrefetch(
         await Promise.all(
           chunk.map(async (hut) => {
             try {
-              const data = await fetchAvailability(hut.id);
+              const data = await fetchAvailability(hut.apiId);
               if (!cancelled) {
                 setAvailabilityByHutId((prev) => ({ ...prev, [hut.id]: data }));
               }

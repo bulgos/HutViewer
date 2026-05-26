@@ -119,7 +119,17 @@ export const HutCard: FC<HutCardProps> = ({
         <summary className="hut-card__summary">
           <span className="hut-card__summary-chevron" aria-hidden />
           More details
-          <span>{hut.id}</span>
+          <button
+            type="button"
+            className="hut-card__copy-id"
+            title="Copy API ID to clipboard"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigator.clipboard.writeText(hut.apiId.toString());
+            }}
+          >
+            API ID
+          </button>
         </summary>
         <div className="hut-card__details-inner">
           {hut.is_private ? (
@@ -208,8 +218,7 @@ export const HutCard: FC<HutCardProps> = ({
               ) : (
                 suitable.map(([key]) => (
                   <span key={key} className="hut-card__chip">
-                    {SUITABILITY_LABELS[key as keyof typeof SUITABILITY_LABELS] ??
-                      key.replace(/_/g, ' ')}
+                    {SUITABILITY_LABELS[key as keyof typeof SUITABILITY_LABELS] ?? key.replace(/_/g, ' ')}
                   </span>
                 ))
               )}
