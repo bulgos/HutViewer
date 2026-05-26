@@ -131,6 +131,21 @@ export const HutCard: FC<HutCardProps> = ({
             API ID
           </button>
         </summary>
+        <summary className="hut-card__summary">
+          <span className="hut-card__summary-chevron" aria-hidden />
+          More details
+          <button
+            type="button"
+            className="hut-card__copy-id"
+            title="Copy SAC ID to clipboard"
+            onClick={(e) => {
+              e.stopPropagation();
+              navigator.clipboard.writeText(hut.id.toString());
+            }}
+          >
+            SAC ID
+          </button>
+        </summary>
         <div className="hut-card__details-inner">
           {hut.is_private ? (
             <span className="hut-card__chip hut-card__chip--muted">Private hut</span>
