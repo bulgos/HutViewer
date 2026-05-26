@@ -20,12 +20,12 @@ export function HutMapMarkers({ huts, hoveredHutId, onMarkerSelect }: Props) {
 
         return (
           <CircleMarker
-            key={hut.location.join(',')}
+            key={hut.id}
             center={hut.location}
             radius={radius}
             pathOptions={pathOptions}
             eventHandlers={{
-              click: () => onMarkerSelect(hut),
+              click: () => onMarkerSelect(hut)
             }}
           >
             <Popup>{hut.geographical_name}</Popup>

@@ -29,6 +29,16 @@ Production uses [Vercel](https://vercel.com) with a rewrite in [`vercel.json`](v
 
 Each push to the connected branch gets a preview/production deployment. Bed availability works on the live URL the same way as locally.
 
+`vercel.json` pins install/build to Bun so Vercel does not fall back to npm when both `bun.lock` and `package-lock.json` exist.
+
+### Troubleshooting: changes not showing on Vercel
+
+1. **Use the Vercel URL** (`*.vercel.app` or your custom domain), not GitHub Pages (`bulgos.github.io/HutViewer/`). That is a separate, static deploy and will not pick up Vercel updates. Disable GitHub Pages under repo **Settings → Pages** if you no longer need it.
+2. **Check the deployment** in the [Vercel dashboard](https://vercel.com/dashboard) → your project → **Deployments**. Production should list the same commit as `main` on GitHub. If the latest deploy failed or is old, open the logs or click **Redeploy**.
+3. **Confirm Git integration**: project **Settings → Git** should point at `bulgos/HutViewer` with production branch `main`.
+4. **Hard-refresh** the browser (cache can keep an old JS bundle): `Cmd+Shift+R` / `Ctrl+Shift+R`.
+5. **Redeploy manually**: `bunx vercel --prod` from this directory (after `bunx vercel link`).
+
 ### Optional: deploy from CLI
 
 ```bash

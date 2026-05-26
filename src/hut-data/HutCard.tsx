@@ -56,7 +56,7 @@ export const HutCard: FC<HutCardProps> = ({
     setAvailabilityLoading(true);
     setAvailabilityError(false);
 
-    fetchAvailability(hut.id)
+    fetchAvailability(hut.apiId)
       .then((data) => {
         if (!cancelled) setAvailability(data);
       })
@@ -76,7 +76,7 @@ export const HutCard: FC<HutCardProps> = ({
     return () => {
       cancelled = true;
     };
-  }, [detailsOpen, hut.id, availabilityFetched]);
+  }, [detailsOpen, hut.apiId, availabilityFetched]);
 
   return (
     <article
