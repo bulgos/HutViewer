@@ -130,10 +130,6 @@ export const HutCard: FC<HutCardProps> = ({
           >
             API ID
           </button>
-        </summary>
-        <summary className="hut-card__summary">
-          <span className="hut-card__summary-chevron" aria-hidden />
-          More details
           <button
             type="button"
             className="hut-card__copy-id"
