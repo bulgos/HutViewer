@@ -1,73 +1,34 @@
-# React + TypeScript + Vite
+# HutViewer
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Map and list of Swiss Alpine Club huts with filters, area selection, and bed availability.
 
-Currently, two official plugins are available:
+## Development
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Opens at [http://localhost:3000](http://localhost:3000). Availability requests use a Vite dev proxy to avoid CORS (`/hut-reservation-api` → hut-reservation.org).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## GitHub Pages
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+The site deploys automatically on push to `main` or `master` via [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml).
+
+**One-time setup in the repository:**
+
+1. **Settings → Pages → Build and deployment**
+2. Set **Source** to **GitHub Actions**
+
+After the workflow succeeds, the site is available at:
+
+`https://<github-username>.github.io/<repository-name>/`
+
+For example, if the repo is `JonasWard/HutViewer`, the URL is `https://jonasward.github.io/HutViewer/`.
+
+You can also run the workflow manually from the **Actions** tab (**Deploy to GitHub Pages** → **Run workflow**).
+
+### Production notes
+
+- Asset paths use the repository name as the Vite `base` path (set automatically in CI via `GITHUB_REPOSITORY`).
+- Availability calls the hut-reservation API directly in production builds. If the browser blocks those requests (CORS), availability filters and hut details will not load on GitHub Pages until a same-origin proxy is added.
