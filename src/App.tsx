@@ -7,6 +7,7 @@ import { applyHutFilters, applyHutFiltersWithoutAvailability } from './filters/a
 import { HutFilters } from './filters/HutFilters';
 import { DEFAULT_HUT_FILTERS, filtersNeedAvailability, type HutFilterState } from './filters/types';
 import { useAvailabilityPrefetch } from './filters/useAvailabilityPrefetch';
+import { getInitialFiltersFromUrl, useFilterUrlSync } from './filters/useFilterUrlSync';
 import { type HutType } from './hut-data/HutType';
 import { HutList } from './hut-data/HutList';
 import { AreaSelector } from './map/AreaSelector';
@@ -16,7 +17,8 @@ import { useRightPanelWidth } from './map/useRightPanelWidth';
 
 function App() {
   const [huts, setHuts] = useState<HutType[]>([]);
-  const [filters, setFilters] = useState<HutFilterState>(DEFAULT_HUT_FILTERS);
+  const [filters, setFilters] = useState<HutFilterState>(getInitialFiltersFromUrl);
+  useFilterUrlSync(filters, setFilters);
   const [drawAreaActive, setDrawAreaActive] = useState(false);
   const [areaDrawHint, setAreaDrawHint] = useState<string | null>(null);
   const [hoveredHutId, setHoveredHutId] = useState<number | null>(null);
