@@ -52,7 +52,7 @@ function hutMatchesAvailability(
   const days = availabilityByHutId[hut.id];
   if (!days || days.length === 0) return false;
 
-  const day = pickAvailabilityDay(days);
+  const day = pickAvailabilityDay(days, filters.availabilityDate);
   if (!day) return false;
 
   if (filters.availabilityMode === 'fullyFree') {

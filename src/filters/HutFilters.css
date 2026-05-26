@@ -97,6 +97,31 @@
   cursor: pointer;
 }
 
+.hut-filters__date {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 10px;
+  color: var(--text-h);
+}
+
+.hut-filters__date-label {
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.hut-filters__date-input {
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  color-scheme: light dark;
+}
+
 .hut-filters__number {
   width: 3rem;
   font-family: var(--mono);

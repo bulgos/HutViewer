@@ -65,10 +65,19 @@ export const HutFilters: FC<Props> = ({
       </fieldset>
 
       <fieldset className="hut-filters__group">
-        <legend className="hut-filters__legend">Availability (next date)</legend>
+        <legend className="hut-filters__legend">Availability</legend>
         {availabilityLoading && (
           <p className="hut-filters__hint hut-filters__hint--loading">Loading availability…</p>
         )}
+        <label className="hut-filters__date">
+          <span className="hut-filters__date-label">Date</span>
+          <input
+            type="date"
+            className="hut-filters__date-input"
+            value={filters.availabilityDate}
+            onChange={(e) => patch({ availabilityDate: e.target.value })}
+          />
+        </label>
         <label className="hut-filters__radio">
           <input
             type="radio"
@@ -107,7 +116,8 @@ export const HutFilters: FC<Props> = ({
           Completely free (all beds available)
         </label>
         <p className="hut-filters__hint">
-          Club huts only. Checks up to {availabilityTargetCount} huts already matching map /
+          Club huts only. Bed filters use availability on the selected date (huts with no data for
+          that night are hidden). Checks up to {availabilityTargetCount} huts already matching map /
           service / activity filters.
         </p>
       </fieldset>

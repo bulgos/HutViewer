@@ -1,4 +1,5 @@
 import type { ServiceKey, SuitabilityKey } from '../hut-data/filter-labels';
+import { todayIsoDate } from './pickAvailabilityDay';
 
 /** [[southWestLat, southWestLng], [northEastLat, northEastLng]] */
 export type AreaBounds = [[number, number], [number, number]];
@@ -7,6 +8,8 @@ export type AvailabilityFilterMode = 'any' | 'minBeds' | 'fullyFree';
 
 export type HutFilterState = {
   areaBounds: AreaBounds | null;
+  /** `YYYY-MM-DD` — bed filters use availability for this night. */
+  availabilityDate: string;
   availabilityMode: AvailabilityFilterMode;
   minFreeBeds: number;
   requiredServices: ServiceKey[];
@@ -15,6 +18,7 @@ export type HutFilterState = {
 
 export const DEFAULT_HUT_FILTERS: HutFilterState = {
   areaBounds: null,
+  availabilityDate: todayIsoDate(),
   availabilityMode: 'any',
   minFreeBeds: 1,
   requiredServices: [],
