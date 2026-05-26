@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/hut-reservation-api/:path*",
+      "destination": "https://www.hut-reservation.org/:path*"
+    }
+  ]
+}

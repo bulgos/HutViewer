@@ -10,7 +10,7 @@ import {
 import './HutCard.css';
 import type { HutAvailability } from './hut-availability';
 import { availabilityLevel, getAvailabilityStatus } from './hut-availability';
-import { fetchAvailability, isAvailabilityApiEnabled } from '../api/get-hut-availability/api';
+import { fetchAvailability } from '../api/get-hut-availability/api';
 import { SERVICE_LABELS, SUITABILITY_LABELS } from './filter-labels';
 
 export type HutCardProps = {
@@ -50,7 +50,7 @@ export const HutCard: FC<HutCardProps> = ({
   }, [hut.id]);
 
   useEffect(() => {
-    if (!detailsOpen || availabilityFetched || hut.is_private || !isAvailabilityApiEnabled()) return;
+    if (!detailsOpen || availabilityFetched || hut.is_private) return;
 
     let cancelled = false;
     setAvailabilityLoading(true);
@@ -127,28 +127,14 @@ export const HutCard: FC<HutCardProps> = ({
           ) : (
             <div className="hut-card__availability-wrap">
               <span className="hut-card__label">Availability</span>
-              {!isAvailabilityApiEnabled() && (
-                <span className="hut-card__chip hut-card__chip--muted">
-                  Only when running locally (npm run dev)
-                </span>
-              )}
-              {isAvailabilityApiEnabled() && availabilityLoading && (
-                <span className="hut-card__chip hut-card__chip--muted">Loading…</span>
-              )}
-              {isAvailabilityApiEnabled() && availabilityError && !availabilityLoading && (
+              {availabilityLoading && <span className="hut-card__chip hut-card__chip--muted">Loading…</span>}
+              {availabilityError && !availabilityLoading && (
                 <span className="hut-card__chip hut-card__chip--muted">Could not load</span>
               )}
-              {isAvailabilityApiEnabled() &&
-                !availabilityLoading &&
-                !availabilityError &&
-                availability.length === 0 &&
-                availabilityFetched && (
+              {!availabilityLoading && !availabilityError && availability.length === 0 && availabilityFetched && (
                 <span className="hut-card__chip hut-card__chip--muted">No dates listed</span>
               )}
-              {isAvailabilityApiEnabled() &&
-                !availabilityLoading &&
-                !availabilityError &&
-                availability.length > 0 && (
+              {!availabilityLoading && !availabilityError && availability.length > 0 && (
                 <ul className="hut-card__availability" aria-label="Bed availability by date">
                   {availability.map((day) => {
                     const availabilityPercentage = availabilityLevel(day.freeBeds, day.totalSleepingPlaces);
