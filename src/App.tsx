@@ -166,22 +166,6 @@ function App() {
           </div>
         )}
         <div className="hut-panels" ref={panelsRef}>
-          <aside className={`hut-panel hut-panel--date`} aria-label="Search date">
-            <div className="hut-panel__chrome">
-              <HutDatePanel
-                value={filters.availabilityDate}
-                onChange={(availabilityDate) => setFiltersTransition((f) => ({ ...f, availabilityDate }))}
-                trailing={
-                  showAvailabilityProgress ? (
-                    <AvailabilityLoadProgress
-                      loaded={availabilityProgress.loaded}
-                      total={availabilityProgress.total}
-                    />
-                  ) : null
-                }
-              />
-            </div>
-          </aside>
           <aside
             className={`hut-panel hut-panel--filters${filtersOpen ? '' : ' hut-panel--collapsed'}`}
             aria-label="Hut filters"
@@ -198,6 +182,20 @@ function App() {
                 {filtersOpen ? '▲' : '▼'}
               </button>
               <span className="hut-panel__rail-label">Filters</span>
+              <div className="hut-panel__chrome">
+                <HutDatePanel
+                  value={filters.availabilityDate}
+                  onChange={(availabilityDate) => setFiltersTransition((f) => ({ ...f, availabilityDate }))}
+                  trailing={
+                    showAvailabilityProgress ? (
+                      <AvailabilityLoadProgress
+                        loaded={availabilityProgress.loaded}
+                        total={availabilityProgress.total}
+                      />
+                    ) : null
+                  }
+                />
+              </div>
             </div>
             {filtersOpen && (
               <HutFilters
