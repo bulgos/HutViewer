@@ -77,7 +77,12 @@ function App() {
         zoom={7}
         scrollWheelZoom={!drawAreaActive}
       >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          maxNativeZoom={19}
+          detectRetina
+        />
         <AreaSelector
           bounds={filters.areaBounds}
           drawActive={drawAreaActive}
