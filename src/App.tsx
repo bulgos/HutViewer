@@ -8,6 +8,7 @@ import { HutFilters } from './filters/HutFilters';
 import { DEFAULT_HUT_FILTERS, filtersNeedAvailability, type HutFilterState } from './filters/types';
 import { useAvailabilityPrefetch } from './filters/useAvailabilityPrefetch';
 import { getInitialFiltersFromUrl, useFilterUrlSync } from './filters/useFilterUrlSync';
+import { HutHoverProvider } from './hut-data/HutHoverContext';
 import { type HutType } from './hut-data/HutType';
 import { HutList } from './hut-data/HutList';
 import { AreaSelector } from './map/AreaSelector';
@@ -21,7 +22,6 @@ function App() {
   useFilterUrlSync(filters, setFilters);
   const [drawAreaActive, setDrawAreaActive] = useState(false);
   const [areaDrawHint, setAreaDrawHint] = useState<string | null>(null);
-  const [hoveredHutId, setHoveredHutId] = useState<number | null>(null);
   const [detailsOpenByHutId, setDetailsOpenByHutId] = useState<Record<number, boolean>>({});
   const [resultsOpen, setResultsOpen] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(true);
@@ -69,6 +69,7 @@ function App() {
   }, []);
 
   return (
+    <HutHoverProvider>
     <section id="center">
       <MapContainer
         style={{ height: '100%', width: '100%' }}
@@ -90,12 +91,7 @@ function App() {
           }
         />
         <MapFlyToHut hut={mapFocusHut} paddingRightPx={mapPaddingRight} />
-        <HutMapMarkers
-          huts={filteredHuts}
-          hoveredHutId={hoveredHutId}
-          onMarkerHover={setHoveredHutId}
-          onMarkerSelect={handleMarkerSelect}
-        />
+        <HutMapMarkers huts={filteredHuts} onMarkerSelect={handleMarkerSelect} />
       </MapContainer>
       {drawAreaActive && (
         <div className="map-draw-hint" role="status">
@@ -168,8 +164,6 @@ function App() {
           {resultsOpen && (
             <HutList
               huts={filteredHuts}
-              hoveredHutId={hoveredHutId}
-              onHoverHut={setHoveredHutId}
               onShowOnMap={handleShowHutOnMap}
               detailsOpenByHutId={detailsOpenByHutId}
               onDetailsOpenChange={handleDetailsOpenChange}
@@ -178,6 +172,7 @@ function App() {
         </aside>
       </div>
     </section>
+    </HutHoverProvider>
   );
 }
 

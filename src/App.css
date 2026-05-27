@@ -279,3 +279,10 @@
     border-right-color: var(--border);
   }
 }
+
+/* Leaflet may leave empty tooltip nodes when unmounting layers */
+.leaflet-tooltip:empty,
+.hut-marker-tooltip:empty {
+  display: none !important;
+  pointer-events: none;
+}

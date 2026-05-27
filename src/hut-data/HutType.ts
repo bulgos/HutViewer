@@ -32,7 +32,7 @@ export type HutType = {
   sleeps: number;
   id: number;
   sacId: number;
-  apiId: number;
+  apiId: number | null;
   is_private: boolean;
   openings: OpeningType[]; // should have 12 of them
   services: ServiceMap;

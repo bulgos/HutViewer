@@ -29,7 +29,7 @@ export const mapDataToHutType = (data: HutTypeApi): HutType => ({
   sleeps: data.sleeps,
   id: data.id,
   sacId: data.sac_id,
-  apiId: data.hrs_id,
+  apiId: (data.hrs_id as number) === 0 ? null : data.hrs_id,
   is_private: data.is_private,
   openings: mapOpeningToOpeningType(data.opening),
   services: data.services,

@@ -147,9 +147,7 @@ export const HutCard: FC<HutCardProps> = ({
           </button>
         </summary>
         <div className="hut-card__details-inner">
-          {hut.is_private ? (
-            <span className="hut-card__chip hut-card__chip--muted">Private hut</span>
-          ) : (
+          {
             <div className="hut-card__availability-wrap">
               <span className="hut-card__label">Availability</span>
               {availabilityLoading && <span className="hut-card__chip hut-card__chip--muted">Loading…</span>}
@@ -181,7 +179,7 @@ export const HutCard: FC<HutCardProps> = ({
                 </ul>
               )}
             </div>
-          )}
+          }
 
           <div className="hut-card__months-wrap">
             <span className="hut-card__label">Season</span>

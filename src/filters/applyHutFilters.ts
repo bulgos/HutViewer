@@ -47,7 +47,8 @@ function hutMatchesAvailability(
   availabilityByHutId: Record<number, HutAvailability[]>,
 ): boolean {
   if (filters.availabilityMode === 'any') return true;
-  if (hut.is_private) return false;
+  // Private huts don't have reservation availability data; don't exclude them from results.
+  if (hut.is_private) return true;
 
   const days = availabilityByHutId[hut.id];
   if (!days || days.length === 0) return false;

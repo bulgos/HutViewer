@@ -1,11 +1,10 @@
 import type { FC } from 'react';
+import { useHutHover } from './HutHoverContext';
 import { HutCard } from './HutCard';
 import type { HutType } from './HutType';
 
 export type HutListProps = {
   huts: HutType[];
-  hoveredHutId: number | null;
-  onHoverHut: (id: number | null) => void;
   onShowOnMap: (hut: HutType) => void;
   detailsOpenByHutId: Record<number, boolean>;
   onDetailsOpenChange: (hutId: number, open: boolean) => void;
@@ -13,12 +12,12 @@ export type HutListProps = {
 
 export const HutList: FC<HutListProps> = ({
   huts,
-  hoveredHutId,
-  onHoverHut,
   onShowOnMap,
   detailsOpenByHutId,
   onDetailsOpenChange,
 }) => {
+  const { hoveredHutId, hoverHut, unhoverHut } = useHutHover();
+
   return (
     <div className="hut-list">
       {huts.length === 0 && (
@@ -31,8 +30,8 @@ export const HutList: FC<HutListProps> = ({
           detailsOpen={detailsOpenByHutId[hut.id] ?? false}
           onDetailsOpenChange={(open) => onDetailsOpenChange(hut.id, open)}
           isHighlighted={hoveredHutId === hut.id}
-          onHoverStart={() => onHoverHut(hut.id)}
-          onHoverEnd={() => onHoverHut(null)}
+          onHoverStart={() => hoverHut(hut.id)}
+          onHoverEnd={() => unhoverHut()}
           onShowOnMap={() => onShowOnMap(hut)}
         />
       ))}

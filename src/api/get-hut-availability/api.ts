@@ -5,7 +5,8 @@ import type { HutAvailabilityApi } from './type';
 
 const URL = `${AVAILABILITY_API_BASE}/api/v1/reservation/getHutAvailability?hutId={hutId}&step=WIZARD`;
 
-export const fetchAvailability = async (apiId: number): Promise<HutAvailability[]> => {
+export const fetchAvailability = async (apiId: number | null): Promise<HutAvailability[]> => {
+  if (apiId === null) return [];
   const response = await fetch(URL.replace('{hutId}', apiId.toString()));
   if (!response.ok) {
     throw new Error(`Availability request failed (${response.status})`);

@@ -116,9 +116,9 @@ export const HutFilters: FC<Props> = ({
           Completely free (all beds available)
         </label>
         <p className="hut-filters__hint">
-          Club huts only. Bed filters use availability on the selected date (huts with no data for
-          that night are hidden). Checks up to {availabilityTargetCount} huts already matching map /
-          service / activity filters.
+          Bed filters use availability on the selected date (huts with no data for that night are
+          hidden). Private huts remain visible (no availability data). Checks up to{' '}
+          {availabilityTargetCount} huts already matching map / service / activity filters.
         </p>
       </fieldset>
 
