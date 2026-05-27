@@ -5,8 +5,8 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/hut-reservation-api/:path*",
-      "destination": "/api/hut-reservation/:path*"
+      "source": "/hut-reservation-api/(.*)",
+      "destination": "/api/hut-reservation?path=$1"
     }
   ]
 }

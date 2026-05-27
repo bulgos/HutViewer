@@ -13,14 +13,30 @@ function cacheSeconds(): number {
     : DEFAULT_CACHE_SECONDS;
 }
 
-export default async function handler(req: Request): Promise<Response> {
-  const url = new URL(req.url);
-  const prefix = '/api/hut-reservation';
-  const pathAfterPrefix = url.pathname.startsWith(prefix)
-    ? url.pathname.slice(prefix.length) || '/'
-    : url.pathname;
+/** Build upstream URL from Vercel rewrite (?path=…) or direct /api/hut-reservation/… invocation. */
+function resolveUpstreamUrl(requestUrl: URL): string {
+  const pathParam = requestUrl.searchParams.get('path');
+  if (pathParam) {
+    const params = new URLSearchParams(requestUrl.searchParams);
+    params.delete('path');
+    const qs = params.toString();
+    const normalized = pathParam.replace(/^\//, '');
+    return `${UPSTREAM}/${normalized}${qs ? `?${qs}` : ''}`;
+  }
 
-  const upstreamUrl = `${UPSTREAM}${pathAfterPrefix}${url.search}`;
+  const prefixes = ['/api/hut-reservation', '/hut-reservation-api'] as const;
+  for (const prefix of prefixes) {
+    if (requestUrl.pathname.startsWith(prefix)) {
+      const rest = requestUrl.pathname.slice(prefix.length) || '/';
+      return `${UPSTREAM}${rest}${requestUrl.search}`;
+    }
+  }
+
+  return `${UPSTREAM}${requestUrl.pathname}${requestUrl.search}`;
+}
+
+export default async function handler(req: Request): Promise<Response> {
+  const upstreamUrl = resolveUpstreamUrl(new URL(req.url));
 
   const upstream = await fetch(upstreamUrl, {
     method: req.method,
