@@ -52,14 +52,16 @@ function App() {
 
   const handleMarkerSelect = useCallback((hut: HutType) => {
     setResultsOpen(true);
-    setMapFocusHut(hut);
-    setDetailsOpenByHutId((prev) => ({ ...prev, [hut.id]: true }));
     requestAnimationFrame(() => {
       document.getElementById(`hut-card-${hut.id}`)?.scrollIntoView({
         behavior: 'smooth',
         block: 'nearest',
       });
     });
+  }, []);
+
+  const handleShowHutOnMap = useCallback((hut: HutType) => {
+    setMapFocusHut(hut);
   }, []);
 
   const handleDetailsOpenChange = useCallback((hutId: number, open: boolean) => {
@@ -91,6 +93,7 @@ function App() {
         <HutMapMarkers
           huts={filteredHuts}
           hoveredHutId={hoveredHutId}
+          onMarkerHover={setHoveredHutId}
           onMarkerSelect={handleMarkerSelect}
         />
       </MapContainer>
@@ -167,6 +170,7 @@ function App() {
               huts={filteredHuts}
               hoveredHutId={hoveredHutId}
               onHoverHut={setHoveredHutId}
+              onShowOnMap={handleShowHutOnMap}
               detailsOpenByHutId={detailsOpenByHutId}
               onDetailsOpenChange={handleDetailsOpenChange}
             />

@@ -1,22 +1,31 @@
-import { CircleMarker, Popup } from 'react-leaflet';
+import { CircleMarker, Tooltip } from 'react-leaflet';
 import type { HutType } from '../hut-data/HutType';
 import { currentMonthOpening, openingMarkerPathOptions } from '../hut-data/openingStatus';
 
 type Props = {
   huts: HutType[];
   hoveredHutId: number | null;
+  onMarkerHover: (hutId: number | null) => void;
   onMarkerSelect: (hut: HutType) => void;
 };
 
-export function HutMapMarkers({ huts, hoveredHutId, onMarkerSelect }: Props) {
+export function HutMapMarkers({ huts, hoveredHutId, onMarkerHover, onMarkerSelect }: Props) {
+  const ordered = [...huts].sort((a, b) => {
+    if (a.id === hoveredHutId) return 1;
+    if (b.id === hoveredHutId) return -1;
+    return 0;
+  });
+
   return (
     <>
-      {huts.map((hut) => {
+      {ordered.map((hut) => {
         const opening = currentMonthOpening(hut);
         const highlighted = hut.id === hoveredHutId;
         const base = openingMarkerPathOptions(opening);
-        const pathOptions = highlighted ? { ...base, weight: 3, fillOpacity: 1 } : base;
-        const radius = 7;
+        const pathOptions = highlighted
+          ? { ...base, weight: 4, opacity: 1, fillOpacity: 1 }
+          : base;
+        const radius = highlighted ? 11 : 7;
 
         return (
           <CircleMarker
@@ -25,10 +34,14 @@ export function HutMapMarkers({ huts, hoveredHutId, onMarkerSelect }: Props) {
             radius={radius}
             pathOptions={pathOptions}
             eventHandlers={{
-              click: () => onMarkerSelect(hut)
+              mouseover: () => onMarkerHover(hut.id),
+              mouseout: () => onMarkerHover(null),
+              click: () => onMarkerSelect(hut),
             }}
           >
-            <Popup>{hut.geographical_name}</Popup>
+            <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
+              {hut.geographical_name}
+            </Tooltip>
           </CircleMarker>
         );
       })}

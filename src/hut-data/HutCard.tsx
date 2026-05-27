@@ -20,6 +20,7 @@ export type HutCardProps = {
   isHighlighted: boolean;
   onHoverStart: () => void;
   onHoverEnd: () => void;
+  onShowOnMap: () => void;
 };
 
 export const HutCard: FC<HutCardProps> = ({
@@ -28,7 +29,8 @@ export const HutCard: FC<HutCardProps> = ({
   onDetailsOpenChange,
   isHighlighted,
   onHoverStart,
-  onHoverEnd
+  onHoverEnd,
+  onShowOnMap,
 }) => {
   const services = Object.entries(hut.services).filter(([, v]) => v);
   const suitable = Object.entries(hut.suitable).filter(([, v]) => v);
@@ -88,11 +90,24 @@ export const HutCard: FC<HutCardProps> = ({
       <header className="hut-card__header">
         <div className="hut-card__header-top">
           <h3 className="hut-card__title">{hut.geographical_name}</h3>
-          <span
-            className={`hut-card__badge ${hut.is_private ? 'hut-card__badge--private' : 'hut-card__badge--shared'}`}
-          >
-            {hut.is_private ? 'Private' : 'Shared'}
-          </span>
+          <div className="hut-card__header-actions">
+            <button
+              type="button"
+              className="hut-card__map-btn"
+              title="Zoom and center map on this hut"
+              onClick={(e) => {
+                e.stopPropagation();
+                onShowOnMap();
+              }}
+            >
+              On map
+            </button>
+            <span
+              className={`hut-card__badge ${hut.is_private ? 'hut-card__badge--private' : 'hut-card__badge--shared'}`}
+            >
+              {hut.is_private ? 'Private' : 'Shared'}
+            </span>
+          </div>
         </div>
         <div className="hut-card__header-meta">
           <span className="hut-card__stat">

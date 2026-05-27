@@ -64,10 +64,12 @@
 
 .hut-card--highlighted {
   border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent-bg) 35%, var(--bg));
   box-shadow:
-    0 0 0 2px var(--accent-bg),
-    rgba(0, 0, 0, 0.12) 0 8px 16px -4px,
-    rgba(0, 0, 0, 0.06) 0 4px 6px -3px;
+    0 0 0 3px color-mix(in srgb, var(--accent) 45%, transparent),
+    0 0 0 1px var(--accent),
+    rgba(0, 0, 0, 0.14) 0 10px 20px -4px,
+    rgba(0, 0, 0, 0.08) 0 4px 8px -3px;
 }
 
 .hut-card__header {
@@ -89,6 +91,31 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+}
+
+.hut-card__header-actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+}
+
+.hut-card__map-btn {
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--accent-border);
+  background: var(--accent-bg);
+  color: var(--text-h);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.hut-card__map-btn:hover {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
 }
 
 .hut-card__header-meta {
