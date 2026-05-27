@@ -13,6 +13,18 @@ import './HutCard.css';
 import { availabilityLevel, getAvailabilityStatus } from './hut-availability';
 import { SERVICE_LABELS, SUITABILITY_LABELS } from './filter-labels';
 
+function hutWebsiteHref(url: string): string {
+  return /^https?:\/\//i.test(url) ? url : `https://${url}`;
+}
+
+function hutWebsiteLabel(url: string): string {
+  try {
+    return new URL(hutWebsiteHref(url)).hostname.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
+}
+
 export type HutCardProps = {
   hut: HutType;
   availability: HutAvailability[];
@@ -107,8 +119,21 @@ export const HutCard: FC<HutCardProps> = memo(function HutCard({
           </button>
         </summary>
         <div className="hut-card__details-inner">
-          {
-            <div className="hut-card__availability-wrap">
+          {hut.url && (
+            <div className="hut-card__website-wrap">
+              <span className="hut-card__label">Website</span>
+              <a
+                href={hutWebsiteHref(hut.url)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hut-card__website-link"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {hutWebsiteLabel(hut.url)}
+              </a>
+            </div>
+          )}
+          <div className="hut-card__availability-wrap">
               <span className="hut-card__label">Availability</span>
               {availability.length === 0 ? (
                 <span className="hut-card__chip hut-card__chip--muted">No dates listed</span>
@@ -133,8 +158,7 @@ export const HutCard: FC<HutCardProps> = memo(function HutCard({
                   })}
                 </ul>
               )}
-            </div>
-          }
+          </div>
 
           <div className="hut-card__months-wrap">
             <span className="hut-card__label">Season</span>

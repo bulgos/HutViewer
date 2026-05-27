@@ -32,6 +32,7 @@ export const mapDataToHutType = (data: HutTypeApi, availability: HutAvailability
   sacId: data.sac_id,
   apiId: (data.hrs_id as number) === 0 ? null : data.hrs_id,
   is_private: data.is_private,
+  url: data.url?.trim() || null,
   openings: mapOpeningToOpeningType(data.opening),
   services: data.services,
   suitable: data.suitable,

@@ -35,6 +35,8 @@ export type HutType = {
   sacId: number;
   apiId: number | null;
   is_private: boolean;
+  /** Hut website from SAC API (`url`), or null when not listed. */
+  url: string | null;
   openings: OpeningType[]; // should have 12 of them
   services: ServiceMap;
   suitable: SuitabilityMap;
