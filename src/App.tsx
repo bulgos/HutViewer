@@ -5,6 +5,7 @@ import { MapContainer, TileLayer } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import { applyHutFilters, applyHutFiltersWithoutAvailability } from './filters/applyHutFilters';
 import { filtersNeedAvailability, filtersUseAvailabilityMap } from './filters/types';
+import { AvailabilityLoadProgress } from './filters/AvailabilityLoadProgress';
 import { HutDatePanel } from './filters/HutDatePanel';
 import { HutFilters } from './filters/HutFilters';
 import { DEFAULT_HUT_FILTERS, type HutFilterState } from './filters/types';
@@ -30,6 +31,7 @@ function App() {
   const [filtersOpen, setFiltersOpen] = useState(true);
   const [mapFocusHut, setMapFocusHut] = useState<HutType | null>(null);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityProgress, setAvailabilityProgress] = useState({ loaded: 0, total: 0 });
   const { availabilityByHutId, scheduleBatch } = useBatchedAvailabilityUpdates();
 
   const setFiltersTransition = useCallback((update: HutFilterState | ((prev: HutFilterState) => HutFilterState)) => {
@@ -65,6 +67,7 @@ function App() {
   useEffect(() => {
     let cancelled = false;
     setAvailabilityLoading(true);
+    setAvailabilityProgress({ loaded: 0, total: 0 });
 
     void loadHutsWithAvailability(
       (loaded) => {
@@ -75,7 +78,11 @@ function App() {
         if (cancelled) return;
         scheduleBatch(batch);
       },
-      () => cancelled
+      (loaded, total) => {
+        if (cancelled) return;
+        setAvailabilityProgress({ loaded, total });
+      },
+      () => cancelled,
     ).finally(() => {
       if (!cancelled) setAvailabilityLoading(false);
     });
@@ -84,6 +91,9 @@ function App() {
       cancelled = true;
     };
   }, [scheduleBatch]);
+
+  const showAvailabilityProgress =
+    availabilityLoading || (availabilityProgress.total > 0 && availabilityProgress.loaded < availabilityProgress.total);
 
   const handleMarkerSelect = useCallback((hut: HutType) => {
     flushSync(() => {
@@ -161,6 +171,14 @@ function App() {
               <HutDatePanel
                 value={filters.availabilityDate}
                 onChange={(availabilityDate) => setFiltersTransition((f) => ({ ...f, availabilityDate }))}
+                trailing={
+                  showAvailabilityProgress ? (
+                    <AvailabilityLoadProgress
+                      loaded={availabilityProgress.loaded}
+                      total={availabilityProgress.total}
+                    />
+                  ) : null
+                }
               />
             </div>
           </aside>

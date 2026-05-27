@@ -14,6 +14,7 @@ export type AvailabilityBatch = Map<number, HutAvailability[]>;
 export async function loadHutsWithAvailability(
   onHutsLoaded: (huts: HutType[]) => void,
   onAvailabilityBatch: (batch: AvailabilityBatch) => void,
+  onProgress: (loaded: number, total: number) => void,
   isCancelled: () => boolean,
 ): Promise<void> {
   const huts = await fetchHutList();
@@ -21,6 +22,10 @@ export async function loadHutsWithAvailability(
   onHutsLoaded(huts);
 
   const toFetch = huts.filter((h) => !h.is_private && h.apiId !== null);
+  const total = toFetch.length;
+  onProgress(0, total);
+  if (total === 0) return;
+
   for (let i = 0; i < toFetch.length; i += CHUNK_SIZE) {
     if (isCancelled()) return;
     const chunk = toFetch.slice(i, i + CHUNK_SIZE);
@@ -43,5 +48,6 @@ export async function loadHutsWithAvailability(
       if (entry) batch.set(entry[0], entry[1]);
     }
     if (batch.size > 0) onAvailabilityBatch(batch);
+    onProgress(Math.min(i + chunk.length, total), total);
   }
 }
