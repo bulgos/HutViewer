@@ -20,7 +20,7 @@ bun run preview
 
 ## Deploy on Vercel
 
-Production uses [Vercel](https://vercel.com) with a rewrite in [`vercel.json`](vercel.json) so availability API calls are proxied server-side (no CORS).
+Production uses [Vercel](https://vercel.com): availability calls hit an edge proxy ([`api/hut-reservation/[...path].ts`](api/hut-reservation/[...path].ts)) that forwards to hut-reservation.org and sets CDN cache headers (default **5 minutes**, configurable via `AVAILABILITY_CACHE_SECONDS` on Vercel).
 
 1. Push this repo to GitHub.
 2. Import the project at [vercel.com/new](https://vercel.com/new).

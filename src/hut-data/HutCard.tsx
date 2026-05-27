@@ -50,7 +50,7 @@ export const HutCard: FC<HutCardProps> = ({
   }, [hut.id]);
 
   useEffect(() => {
-    if (!detailsOpen || availabilityFetched || hut.is_private) return;
+    if (!detailsOpen || availabilityFetched) return;
 
     let cancelled = false;
     setAvailabilityLoading(true);
