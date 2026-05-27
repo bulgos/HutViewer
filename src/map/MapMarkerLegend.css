@@ -1,8 +1,8 @@
 .map-legend {
   position: fixed;
   z-index: 1000;
-  left: 8px;
-  bottom: 8px;
+  left: 4px;
+  bottom: 4px;
   max-width: min(160px, calc(100vw - 56px));
   max-height: min(50vh, 360px);
   pointer-events: auto;

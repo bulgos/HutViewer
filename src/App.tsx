@@ -14,6 +14,7 @@ import { HutHoverProvider } from './hut-data/HutHoverContext';
 import { loadHutsWithAvailability } from './hut-data/loadHutsWithAvailability';
 import { useBatchedAvailabilityUpdates } from './hut-data/useBatchedAvailabilityUpdates';
 import { type HutType } from './hut-data/HutType';
+import { HutDetailAsidePanel } from './hut-data/HutDetailAside';
 import { HutList } from './hut-data/HutList';
 import { AreaSelector } from './map/AreaSelector';
 import { HutMapMarkers } from './map/HutMapMarkers';
@@ -26,7 +27,7 @@ function App() {
   const [filters, setFilters] = useState<HutFilterState>(getInitialFiltersFromUrl);
   const [drawAreaActive, setDrawAreaActive] = useState(false);
   const [areaDrawHint, setAreaDrawHint] = useState<string | null>(null);
-  const [detailsOpenByHutId, setDetailsOpenByHutId] = useState<Record<number, boolean>>({});
+  const [selectedHutId, setSelectedHutId] = useState<number | null>(null);
   const [resultsOpen, setResultsOpen] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(true);
   const [mapFocusHut, setMapFocusHut] = useState<HutType | null>(null);
@@ -95,30 +96,39 @@ function App() {
   const showAvailabilityProgress =
     availabilityLoading || (availabilityProgress.total > 0 && availabilityProgress.loaded < availabilityProgress.total);
 
-  const handleMarkerSelect = useCallback((hut: HutType) => {
-    flushSync(() => {
-      setDetailsOpenByHutId((prev) => ({ ...prev, [hut.id]: true }));
-      setResultsOpen(true);
-    });
+  const selectedHut = useMemo(
+    () => (selectedHutId === null ? null : huts.find((h) => h.id === selectedHutId) ?? null),
+    [huts, selectedHutId]
+  );
 
-    const scrollToCard = () => {
-      document.getElementById(`hut-card-${hut.id}`)?.scrollIntoView({
-        behavior: 'auto',
-        block: 'nearest'
-      });
-    };
-
-    scrollToCard();
-    // Re-scroll once after expanded card layout is painted.
-    requestAnimationFrame(scrollToCard);
+  const handleSelectHut = useCallback((hut: HutType) => {
+    setSelectedHutId(hut.id);
   }, []);
+
+  const handleMarkerSelect = useCallback(
+    (hut: HutType) => {
+      flushSync(() => {
+        setSelectedHutId(hut.id);
+      });
+
+      if (!resultsOpen) return;
+
+      requestAnimationFrame(() => {
+        document.getElementById(`hut-card-${hut.id}`)?.scrollIntoView({
+          behavior: 'auto',
+          block: 'nearest'
+        });
+      });
+    },
+    [resultsOpen]
+  );
 
   const handleShowHutOnMap = useCallback((hut: HutType) => {
     setMapFocusHut(hut);
   }, []);
 
-  const handleDetailsOpenChange = useCallback((hutId: number, open: boolean) => {
-    setDetailsOpenByHutId((prev) => ({ ...prev, [hutId]: open }));
+  const handleCloseHutDetails = useCallback(() => {
+    setSelectedHutId(null);
   }, []);
 
   return (
@@ -165,7 +175,8 @@ function App() {
             {areaDrawHint}
           </div>
         )}
-        <div className="hut-panels" ref={panelsRef}>
+        <div className="hut-panels-column" ref={panelsRef}>
+          <div className="hut-panels">
           <aside
             className={`hut-panel hut-panel--filters${filtersOpen ? '' : ' hut-panel--collapsed'}`}
             aria-label="Hut filters"
@@ -238,14 +249,20 @@ function App() {
               <div className="hut-panel__expandable-inner">
                 <HutList
                   huts={filteredHuts}
-                  availabilityByHutId={availabilityByHutId}
+                  selectedHutId={selectedHutId}
+                  onSelectHut={handleSelectHut}
                   onShowOnMap={handleShowHutOnMap}
-                  detailsOpenByHutId={detailsOpenByHutId}
-                  onDetailsOpenChange={handleDetailsOpenChange}
                 />
               </div>
             </div>
           </aside>
+          </div>
+          <HutDetailAsidePanel
+            hut={selectedHut}
+            availabilityByHutId={availabilityByHutId}
+            availabilityDate={filters.availabilityDate}
+            onClose={handleCloseHutDetails}
+          />
         </div>
       </section>
     </HutHoverProvider>

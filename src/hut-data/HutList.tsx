@@ -1,7 +1,5 @@
 import { memo } from 'react';
-import { getHutAvailability, type AvailabilityByHutId } from './availabilityStore';
-import type { HutAvailability } from './hut-availability';
-import { HutCard } from './HutCard';
+import { HutCardMinimal } from './HutCardMinimal';
 import { HutCardPlaceholder } from './HutCardPlaceholder';
 import { useHutHoverActions } from './HutHoverContext';
 import type { HutType } from './HutType';
@@ -9,23 +7,20 @@ import { useInView } from './useInView';
 
 export type HutListProps = {
   huts: HutType[];
-  availabilityByHutId: AvailabilityByHutId;
+  selectedHutId: number | null;
+  onSelectHut: (hut: HutType) => void;
   onShowOnMap: (hut: HutType) => void;
-  detailsOpenByHutId: Record<number, boolean>;
-  onDetailsOpenChange: (hutId: number, open: boolean) => void;
 };
 
-const LazyHutCard = memo(function LazyHutCard({
+const LazyHutCardMinimal = memo(function LazyHutCardMinimal({
   hut,
-  availability,
-  detailsOpen,
-  onDetailsOpenChange,
+  selected,
+  onSelect,
   onShowOnMap,
 }: {
   hut: HutType;
-  availability: HutAvailability[];
-  detailsOpen: boolean;
-  onDetailsOpenChange: (open: boolean) => void;
+  selected: boolean;
+  onSelect: () => void;
   onShowOnMap: () => void;
 }) {
   const { ref, inView } = useInView();
@@ -33,12 +28,11 @@ const LazyHutCard = memo(function LazyHutCard({
 
   return (
     <div ref={ref} id={`hut-card-${hut.id}`} className="hut-list__item">
-      {inView || detailsOpen ? (
-        <HutCard
+      {inView || selected ? (
+        <HutCardMinimal
           hut={hut}
-          availability={availability}
-          detailsOpen={detailsOpen}
-          onDetailsOpenChange={onDetailsOpenChange}
+          selected={selected}
+          onSelect={onSelect}
           onHoverStart={() => hoverHut(hut.id)}
           onHoverEnd={() => unhoverHut()}
           onShowOnMap={onShowOnMap}
@@ -52,10 +46,9 @@ const LazyHutCard = memo(function LazyHutCard({
 
 export function HutList({
   huts,
-  availabilityByHutId,
+  selectedHutId,
+  onSelectHut,
   onShowOnMap,
-  detailsOpenByHutId,
-  onDetailsOpenChange,
 }: HutListProps) {
   return (
     <div className="hut-list">
@@ -63,12 +56,11 @@ export function HutList({
         <p className="hut-list__empty">No huts match the current filters.</p>
       )}
       {huts.map((hut) => (
-        <LazyHutCard
+        <LazyHutCardMinimal
           key={hut.id}
           hut={hut}
-          availability={getHutAvailability(hut.id, availabilityByHutId)}
-          detailsOpen={detailsOpenByHutId[hut.id] ?? false}
-          onDetailsOpenChange={(open) => onDetailsOpenChange(hut.id, open)}
+          selected={selectedHutId === hut.id}
+          onSelect={() => onSelectHut(hut)}
           onShowOnMap={() => onShowOnMap(hut)}
         />
       ))}
