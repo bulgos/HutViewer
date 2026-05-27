@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { AVAILABILITY_MARKER_PALETTE, type AvailabilityStatus } from '../hut-data/hut-availability';
 import { OPENING_LABEL, OPENING_MARKER_PALETTE } from '../hut-data/openingStatus';
-import './MapMarkerLegend.css';
 import type { OpeningType } from '../hut-data/HutType';
+import '../filters/HutFilters.css';
+import './MapMarkerLegend.css';
 
 const AVAILABILITY_LEGEND: { status: AvailabilityStatus; label: string }[] = [
   { status: 'full', label: 'Full (≥99% booked)' },
@@ -56,38 +57,44 @@ export const MapMarkerLegend = () => {
   };
 
   return (
-    <div className={`map-legend${open ? '' : ' map-legend--collapsed'}`}>
-      <button
-        type="button"
-        className="map-legend__toggle"
-        onClick={toggleLegend}
-        aria-expanded={open}
-        aria-controls="map-marker-legend-body"
-      >
-        {open ? 'Hide legend' : 'Map legend'}
-      </button>
-      {open && (
-        <div id="map-marker-legend-body" className="map-legend__body">
-          <p className="map-legend__title">Map markers</p>
-          <section className="map-legend__section">
+    <aside className={`hut-panel map-legend${open ? '' : ' hut-panel--collapsed'}`} aria-label="Map legend">
+      <div className="hut-panel__chrome">
+        <button
+          type="button"
+          className="hut-panel__toggle"
+          onClick={toggleLegend}
+          aria-expanded={open}
+          aria-controls="map-marker-legend-body"
+          aria-label={open ? 'Collapse legend' : 'Expand legend'}
+          title={open ? 'Collapse legend' : 'Expand legend'}
+        >
+          {open ? '▼' : '▲'}
+        </button>
+        <span className="hut-panel__rail-label">Legend</span>
+      </div>
+      <div className="hut-panel__expandable">
+        <div id="map-marker-legend-body" className="hut-panel__expandable-inner map-legend__body hut-filters">
+          <fieldset className="hut-filters__group">
+            <legend className="hut-filters__legend">Bed occupancy</legend>
             <ul className="map-legend__list">
               {AVAILABILITY_LEGEND.map(({ status, label }) => {
                 const { fill, stroke } = AVAILABILITY_MARKER_PALETTE[status];
                 return <LegendRow key={status} fill={fill} stroke={stroke} label={label} />;
               })}
             </ul>
-          </section>
-          <section className="map-legend__section">
-            <p className="map-legend__note">Used when no bed data for the selected date</p>
+          </fieldset>
+          <fieldset className="hut-filters__group">
+            <legend className="hut-filters__legend">Opening (this month)</legend>
+            <p className="hut-filters__hint">Used when no bed data for the selected date (50% opacity).</p>
             <ul className="map-legend__list">
               {OPENING_LEGEND.map((kind) => {
                 const { fill, stroke } = OPENING_MARKER_PALETTE[kind];
                 return <LegendRow key={kind} fill={fill} stroke={stroke} label={OPENING_LABEL[kind]} dimmed />;
               })}
             </ul>
-          </section>
+          </fieldset>
         </div>
-      )}
-    </div>
+      </div>
+    </aside>
   );
 };

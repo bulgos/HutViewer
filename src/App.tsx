@@ -182,40 +182,37 @@ function App() {
                 {filtersOpen ? '▲' : '▼'}
               </button>
               <span className="hut-panel__rail-label">Filters</span>
-              <div className="hut-panel__chrome">
-                <HutDatePanel
-                  value={filters.availabilityDate}
-                  onChange={(availabilityDate) => setFiltersTransition((f) => ({ ...f, availabilityDate }))}
-                  trailing={
-                    showAvailabilityProgress ? (
-                      <AvailabilityLoadProgress
-                        loaded={availabilityProgress.loaded}
-                        total={availabilityProgress.total}
-                      />
-                    ) : null
-                  }
+              <HutDatePanel
+                value={filters.availabilityDate}
+                onChange={(availabilityDate) => setFiltersTransition((f) => ({ ...f, availabilityDate }))}
+                trailing={
+                  showAvailabilityProgress ? (
+                    <AvailabilityLoadProgress loaded={availabilityProgress.loaded} total={availabilityProgress.total} />
+                  ) : null
+                }
+              />
+            </div>
+            <div className="hut-panel__expandable">
+              <div className="hut-panel__expandable-inner">
+                <HutFilters
+                  filters={filters}
+                  onChange={setFiltersTransition}
+                  drawAreaActive={drawAreaActive}
+                  onDrawAreaToggle={() => {
+                    setAreaDrawHint(null);
+                    setDrawAreaActive((v) => !v);
+                  }}
+                  onClearArea={() => setFiltersTransition((f) => ({ ...f, areaBounds: null }))}
+                  availabilityLoading={needAvailability && availabilityLoading}
+                  availabilityTargetCount={availabilityTargetCount}
+                  onResetAll={() => {
+                    setFiltersTransition(DEFAULT_HUT_FILTERS);
+                    setDrawAreaActive(false);
+                    setAreaDrawHint(null);
+                  }}
                 />
               </div>
             </div>
-            {filtersOpen && (
-              <HutFilters
-                filters={filters}
-                onChange={setFiltersTransition}
-                drawAreaActive={drawAreaActive}
-                onDrawAreaToggle={() => {
-                  setAreaDrawHint(null);
-                  setDrawAreaActive((v) => !v);
-                }}
-                onClearArea={() => setFiltersTransition((f) => ({ ...f, areaBounds: null }))}
-                availabilityLoading={needAvailability && availabilityLoading}
-                availabilityTargetCount={availabilityTargetCount}
-                onResetAll={() => {
-                  setFiltersTransition(DEFAULT_HUT_FILTERS);
-                  setDrawAreaActive(false);
-                  setAreaDrawHint(null);
-                }}
-              />
-            )}
           </aside>
           <aside
             className={`hut-panel hut-panel--results${resultsOpen ? '' : ' hut-panel--collapsed'}`}
@@ -237,15 +234,17 @@ function App() {
                 {filteredHuts.length} / {huts.length}
               </span>
             </div>
-            {resultsOpen && (
-              <HutList
-                huts={filteredHuts}
-                availabilityByHutId={availabilityByHutId}
-                onShowOnMap={handleShowHutOnMap}
-                detailsOpenByHutId={detailsOpenByHutId}
-                onDetailsOpenChange={handleDetailsOpenChange}
-              />
-            )}
+            <div className="hut-panel__expandable">
+              <div className="hut-panel__expandable-inner">
+                <HutList
+                  huts={filteredHuts}
+                  availabilityByHutId={availabilityByHutId}
+                  onShowOnMap={handleShowHutOnMap}
+                  detailsOpenByHutId={detailsOpenByHutId}
+                  onDetailsOpenChange={handleDetailsOpenChange}
+                />
+              </div>
+            </div>
           </aside>
         </div>
       </section>
