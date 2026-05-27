@@ -1,4 +1,5 @@
-import type { CircleMarker as LeafletCircleMarker, LeafletMouseEvent } from 'leaflet';
+import type { CircleMarker as LeafletCircleMarker } from 'leaflet';
+import { useEffect, useRef } from 'react';
 import { CircleMarker } from 'react-leaflet';
 import { useHutHover } from '../hut-data/HutHoverContext';
 import type { HutType } from '../hut-data/HutType';
@@ -16,20 +17,42 @@ type Props = {
   onMarkerSelect: (hut: HutType) => void;
 };
 
-function showMarkerTooltip(e: LeafletMouseEvent, label: string) {
-  const layer = e.target as LeafletCircleMarker;
-  layer.unbindTooltip();
-  layer.bindTooltip(label, TOOLTIP_OPTIONS).openTooltip();
-}
-
-function hideMarkerTooltip(e: LeafletMouseEvent) {
-  const layer = e.target as LeafletCircleMarker;
+function clearLayerTooltip(layer: LeafletCircleMarker) {
   layer.closeTooltip();
   layer.unbindTooltip();
 }
 
 export function HutMapMarkers({ huts, onMarkerSelect }: Props) {
   const { hoveredHutId, hoverHut, unhoverHut } = useHutHover();
+  const markerLayersRef = useRef<Map<number, LeafletCircleMarker>>(new Map());
+
+  useEffect(() => {
+    const layers = markerLayersRef.current;
+
+    for (const layer of layers.values()) {
+      clearLayerTooltip(layer);
+    }
+
+    if (hoveredHutId === null) return;
+
+    const hut = huts.find((h) => h.id === hoveredHutId);
+    const layer = layers.get(hoveredHutId);
+    if (!hut || !layer) return;
+
+    layer.bringToFront();
+    layer.bindTooltip(hut.geographical_name, TOOLTIP_OPTIONS).openTooltip();
+  }, [hoveredHutId, huts]);
+
+  const registerMarker = (hutId: number, layer: LeafletCircleMarker | null) => {
+    const layers = markerLayersRef.current;
+    if (layer) {
+      layers.set(hutId, layer);
+    } else {
+      const existing = layers.get(hutId);
+      if (existing) clearLayerTooltip(existing);
+      layers.delete(hutId);
+    }
+  };
 
   return (
     <>
@@ -43,19 +66,13 @@ export function HutMapMarkers({ huts, onMarkerSelect }: Props) {
         return (
           <CircleMarker
             key={hut.id}
+            ref={(layer) => registerMarker(hut.id, layer)}
             center={hut.location}
             radius={radius}
             pathOptions={pathOptions}
             eventHandlers={{
-              mouseover: (e) => {
-                e.target.bringToFront?.();
-                showMarkerTooltip(e, hut.geographical_name);
-                hoverHut(hut.id);
-              },
-              mouseout: (e) => {
-                hideMarkerTooltip(e);
-                unhoverHut();
-              },
+              mouseover: () => hoverHut(hut.id),
+              mouseout: () => unhoverHut(),
               click: () => onMarkerSelect(hut),
             }}
           />
