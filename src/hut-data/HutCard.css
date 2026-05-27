@@ -516,8 +516,8 @@
 }
 
 .hut-card__availability-status--low {
-  background: rgba(251, 191, 36, 0.15);
-  border-color: rgba(222, 245, 11, 0.45);
+  background: rgba(217, 240, 74, 0.18);
+  border-color: rgba(156, 184, 6, 0.45);
   color: var(--text-h);
 }
 

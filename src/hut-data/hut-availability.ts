@@ -35,7 +35,7 @@ export const AVAILABILITY_MARKER_PALETTE: Record<
   full: { fill: '#ef4444', stroke: '#df1010' },
   'nearly-full': { fill: '#fb923c', stroke: '#f5590b' },
   'half-full': { fill: '#fbbf24', stroke: '#f58c0b' },
-  low: { fill: '#fde047', stroke: '#ca8a04' },
+  low: { fill: '#d9f04a', stroke: '#9cb806' },
   empty: { fill: '#22c55e', stroke: '#16a34a' },
   unknown: { fill: '#94a3b8', stroke: '#64748b' },
 };
