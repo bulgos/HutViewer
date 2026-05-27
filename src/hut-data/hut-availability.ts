@@ -28,7 +28,7 @@ export function getAvailabilityStatus(percentage: number): AvailabilityStatus {
   return 'empty';
 }
 
-const AVAILABILITY_MARKER_PALETTE: Record<
+export const AVAILABILITY_MARKER_PALETTE: Record<
   AvailabilityStatus,
   { fill: string; stroke: string }
 > = {

@@ -52,7 +52,7 @@ export function openingVisualKind(opening: OpeningType | undefined): OpeningVisu
  * Colours aligned with HutCard “this month” pill and season legend
  * (open purple; serviced green; closed slate).
  */
-const MARKER_PALETTE: Record<OpeningVisualKind, { fill: string; stroke: string }> = {
+export const OPENING_MARKER_PALETTE: Record<OpeningVisualKind, { fill: string; stroke: string }> = {
   closed: { fill: '#94a3b8', stroke: '#64748b' },
   open: { fill: '#aa3bff', stroke: '#7c3aed' },
   serviced: { fill: '#22c55e', stroke: '#15803d' },
@@ -60,12 +60,12 @@ const MARKER_PALETTE: Record<OpeningVisualKind, { fill: string; stroke: string }
 };
 
 export function openingMarkerPathOptions(opening: OpeningType | undefined): PathOptions {
-  const { fill, stroke } = MARKER_PALETTE[openingVisualKind(opening)];
+  const { fill, stroke } = OPENING_MARKER_PALETTE[openingVisualKind(opening)];
   return {
     fillColor: fill,
     color: stroke,
     weight: 2,
     opacity: 1,
-    fillOpacity: 0.9,
+    fillOpacity: 0.9
   };
 }

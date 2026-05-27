@@ -17,6 +17,7 @@ import { HutList } from './hut-data/HutList';
 import { AreaSelector } from './map/AreaSelector';
 import { HutMapMarkers } from './map/HutMapMarkers';
 import { MapFlyToHut } from './map/MapFlyToHut';
+import { MapMarkerLegend } from './map/MapMarkerLegend';
 import { useRightPanelWidth } from './map/useRightPanelWidth';
 
 function App() {
@@ -51,14 +52,14 @@ function App() {
       useAvailabilityMap
         ? applyHutFilters(huts, filters, availabilityByHutId)
         : applyHutFiltersWithoutAvailability(huts, filters),
-    [huts, filters, useAvailabilityMap, useAvailabilityMap ? availabilityByHutId : null],
+    [huts, filters, useAvailabilityMap, useAvailabilityMap ? availabilityByHutId : null]
   );
 
   const mapHuts = useAvailabilityMap ? filteredHuts : hutsBeforeAvailability;
 
   const availabilityTargetCount = useMemo(
     () => hutsBeforeAvailability.filter((h) => !h.is_private).length,
-    [hutsBeforeAvailability],
+    [hutsBeforeAvailability]
   );
 
   useEffect(() => {
@@ -74,7 +75,7 @@ function App() {
         if (cancelled) return;
         scheduleBatch(batch);
       },
-      () => cancelled,
+      () => cancelled
     ).finally(() => {
       if (!cancelled) setAvailabilityLoading(false);
     });
@@ -93,7 +94,7 @@ function App() {
     const scrollToCard = () => {
       document.getElementById(`hut-card-${hut.id}`)?.scrollIntoView({
         behavior: 'auto',
-        block: 'nearest',
+        block: 'nearest'
       });
     };
 
@@ -143,6 +144,7 @@ function App() {
             onMarkerSelect={handleMarkerSelect}
           />
         </MapContainer>
+        <MapMarkerLegend />
         {drawAreaActive && (
           <div className="map-draw-hint" role="status">
             Drag on the map to mark the search area
