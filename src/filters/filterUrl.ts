@@ -4,6 +4,9 @@ import { DEFAULT_HUT_FILTERS } from './types';
 const PARAM_DATE = 'date';
 const PARAM_AVAILABILITY = 'availability';
 const PARAM_MIN_BEDS = 'minBeds';
+const PARAM_HIDE_NO_RESERVATION = 'hideNoReservation';
+/** @deprecated Legacy param — maps to hide huts without reservation data. */
+const PARAM_RESERVATION = 'reservation';
 const PARAM_AREA = 'area';
 
 const AVAIL_TO_PARAM: Record<AvailabilityFilterMode, string> = {
@@ -19,6 +22,13 @@ const PARAM_TO_AVAIL: Record<string, AvailabilityFilterMode> = {
 };
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+
+function parseFlag(value: string | null): boolean | undefined {
+  if (value === null) return undefined;
+  if (value === '1' || value === 'true') return true;
+  if (value === '0' || value === 'false') return false;
+  return undefined;
+}
 
 function parseAreaParam(value: string): AreaBounds | null {
   const parts = value.split(',').map((s) => Number(s.trim()));
@@ -62,6 +72,14 @@ export function parseFiltersFromSearchParams(search: string): Partial<HutFilterS
     }
   }
 
+  const hideNo = parseFlag(params.get(PARAM_HIDE_NO_RESERVATION));
+  if (hideNo !== undefined) partial.hideHutsWithoutReservationData = hideNo;
+
+  const reservation = params.get(PARAM_RESERVATION);
+  if (reservation === 'with') {
+    partial.hideHutsWithoutReservationData = true;
+  }
+
   const area = params.get(PARAM_AREA);
   if (area) {
     const bounds = parseAreaParam(area);
@@ -93,6 +111,10 @@ export function buildSearchParamsForFilters(filters: HutFilterState): URLSearchP
     params.set(PARAM_MIN_BEDS, String(filters.minFreeBeds));
   }
 
+  if (filters.hideHutsWithoutReservationData) {
+    params.set(PARAM_HIDE_NO_RESERVATION, '1');
+  }
+
   return params;
 }
 
@@ -118,6 +140,7 @@ export function applyUrlSearchToFilters(prev: HutFilterState): HutFilterState {
     areaBounds: null,
     availabilityDate: DEFAULT_HUT_FILTERS.availabilityDate,
     availabilityMode: DEFAULT_HUT_FILTERS.availabilityMode,
+    hideHutsWithoutReservationData: DEFAULT_HUT_FILTERS.hideHutsWithoutReservationData,
     minFreeBeds: DEFAULT_HUT_FILTERS.minFreeBeds,
     ...readFiltersFromUrl(),
   };

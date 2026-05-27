@@ -11,6 +11,8 @@ export type HutFilterState = {
   /** `YYYY-MM-DD` — bed filters use availability for this night. */
   availabilityDate: string;
   availabilityMode: AvailabilityFilterMode;
+  /** Hide huts with no reservation data for the selected date. */
+  hideHutsWithoutReservationData: boolean;
   minFreeBeds: number;
   requiredServices: ServiceKey[];
   requiredSuitable: SuitabilityKey[];
@@ -20,19 +22,25 @@ export const DEFAULT_HUT_FILTERS: HutFilterState = {
   areaBounds: null,
   availabilityDate: todayIsoDate(),
   availabilityMode: 'any',
+  hideHutsWithoutReservationData: false,
   minFreeBeds: 1,
   requiredServices: [],
-  requiredSuitable: [],
+  requiredSuitable: []
 };
 
 export function filtersNeedAvailability(filters: HutFilterState): boolean {
   return filters.availabilityMode === 'minBeds' || filters.availabilityMode === 'fullyFree';
 }
 
+export function filtersUseAvailabilityMap(filters: HutFilterState): boolean {
+  return filtersNeedAvailability(filters) || filters.hideHutsWithoutReservationData;
+}
+
 export function hasActiveFilters(filters: HutFilterState): boolean {
   return (
     filters.areaBounds !== null ||
     filters.availabilityMode !== 'any' ||
+    filters.hideHutsWithoutReservationData ||
     filters.requiredServices.length > 0 ||
     filters.requiredSuitable.length > 0
   );

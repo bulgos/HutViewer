@@ -1,25 +1,17 @@
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { createContext, useCallback, useContext, useRef, type ReactNode } from 'react';
+import { setHoveredHutId } from './hoverStore';
 
-type HutHoverContextValue = {
-  hoveredHutId: number | null;
+type HutHoverActions = {
   hoverHut: (hutId: number) => void;
   unhoverHut: () => void;
 };
 
-const HutHoverContext = createContext<HutHoverContextValue | null>(null);
+const HutHoverContext = createContext<HutHoverActions | null>(null);
 
 /** Delay clearing hover so moving between map marker and result card does not flicker. */
 const UNHOVER_DELAY_MS = 80;
 
 export function HutHoverProvider({ children }: { children: ReactNode }) {
-  const [hoveredHutId, setHoveredHutId] = useState<number | null>(null);
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const hoverHut = useCallback((hutId: number) => {
@@ -38,17 +30,13 @@ export function HutHoverProvider({ children }: { children: ReactNode }) {
     }, UNHOVER_DELAY_MS);
   }, []);
 
-  return (
-    <HutHoverContext.Provider value={{ hoveredHutId, hoverHut, unhoverHut }}>
-      {children}
-    </HutHoverContext.Provider>
-  );
+  return <HutHoverContext.Provider value={{ hoverHut, unhoverHut }}>{children}</HutHoverContext.Provider>;
 }
 
-export function useHutHover(): HutHoverContextValue {
+export function useHutHoverActions(): HutHoverActions {
   const ctx = useContext(HutHoverContext);
   if (!ctx) {
-    throw new Error('useHutHover must be used within HutHoverProvider');
+    throw new Error('useHutHoverActions must be used within HutHoverProvider');
   }
   return ctx;
 }

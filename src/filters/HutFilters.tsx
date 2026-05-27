@@ -66,18 +66,7 @@ export const HutFilters: FC<Props> = ({
 
       <fieldset className="hut-filters__group">
         <legend className="hut-filters__legend">Availability</legend>
-        {availabilityLoading && (
-          <p className="hut-filters__hint hut-filters__hint--loading">Loading availability…</p>
-        )}
-        <label className="hut-filters__date">
-          <span className="hut-filters__date-label">Date</span>
-          <input
-            type="date"
-            className="hut-filters__date-input"
-            value={filters.availabilityDate}
-            onChange={(e) => patch({ availabilityDate: e.target.value })}
-          />
-        </label>
+        {availabilityLoading && <p className="hut-filters__hint hut-filters__hint--loading">Loading availability…</p>}
         <label className="hut-filters__radio">
           <input
             type="radio"
@@ -116,9 +105,22 @@ export const HutFilters: FC<Props> = ({
           Completely free (all beds available)
         </label>
         <p className="hut-filters__hint">
-          Bed filters use availability on the selected date (huts with no data for that night are
-          hidden). Private huts remain visible (no availability data). Checks up to{' '}
-          {availabilityTargetCount} huts already matching map / service / activity filters.
+          Bed filters use the date from the Date panel. Huts without data for that night or with 0 beds listed are
+          hidden. Checks up to {availabilityTargetCount} huts already matching map / service / activity filters.
+        </p>
+        <div className="hut-filters__checks">
+          <label className="hut-filters__check">
+            <input
+              type="checkbox"
+              checked={filters.hideHutsWithoutReservationData}
+              onChange={(e) => patch({ hideHutsWithoutReservationData: e.target.checked })}
+            />
+            Hide huts without reservation data
+          </label>
+        </div>
+        <p className="hut-filters__hint">
+          Uses the date from the Date panel. “With data” means beds listed for that night; huts still loading count as
+          without data.
         </p>
       </fieldset>
 
@@ -132,7 +134,7 @@ export const HutFilters: FC<Props> = ({
                 checked={filters.requiredServices.includes(key)}
                 onChange={() =>
                   patch({
-                    requiredServices: toggleKey(filters.requiredServices, key as ServiceKey),
+                    requiredServices: toggleKey(filters.requiredServices, key as ServiceKey)
                   })
                 }
               />
@@ -152,7 +154,7 @@ export const HutFilters: FC<Props> = ({
                 checked={filters.requiredSuitable.includes(key)}
                 onChange={() =>
                   patch({
-                    requiredSuitable: toggleKey(filters.requiredSuitable, key as SuitabilityKey),
+                    requiredSuitable: toggleKey(filters.requiredSuitable, key as SuitabilityKey)
                   })
                 }
               />

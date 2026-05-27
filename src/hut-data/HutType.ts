@@ -1,4 +1,5 @@
 import type { HutTypeApi } from '../api/get-hut-data/type';
+import type { HutAvailability } from './hut-availability';
 
 export type OpeningType = 'closed' | 'open' | 'serviced';
 type ServiceMap = Partial<{
@@ -37,5 +38,6 @@ export type HutType = {
   openings: OpeningType[]; // should have 12 of them
   services: ServiceMap;
   suitable: SuitabilityMap;
+  availability: HutAvailability[];
   rawData: HutTypeApi;
 };

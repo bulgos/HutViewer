@@ -1,4 +1,6 @@
-import { useEffect, useState, type FC } from 'react';
+import { memo, type FC } from 'react';
+import type { HutAvailability } from './hut-availability';
+import { useIsHutHovered } from './useIsHutHovered';
 import type { HutType } from './HutType';
 import {
   CALENDAR_MONTH_SHORT,
@@ -8,81 +10,39 @@ import {
   openingVisualKind
 } from './openingStatus';
 import './HutCard.css';
-import type { HutAvailability } from './hut-availability';
 import { availabilityLevel, getAvailabilityStatus } from './hut-availability';
-import { fetchAvailability } from '../api/get-hut-availability/api';
 import { SERVICE_LABELS, SUITABILITY_LABELS } from './filter-labels';
 
 export type HutCardProps = {
   hut: HutType;
+  availability: HutAvailability[];
   detailsOpen: boolean;
   onDetailsOpenChange: (open: boolean) => void;
-  isHighlighted: boolean;
   onHoverStart: () => void;
   onHoverEnd: () => void;
   onShowOnMap: () => void;
 };
 
-export const HutCard: FC<HutCardProps> = ({
+export const HutCard: FC<HutCardProps> = memo(function HutCard({
   hut,
+  availability,
   detailsOpen,
   onDetailsOpenChange,
-  isHighlighted,
   onHoverStart,
   onHoverEnd,
   onShowOnMap,
-}) => {
+}) {
+  const isHighlighted = useIsHutHovered(hut.id);
   const services = Object.entries(hut.services).filter(([, v]) => v);
   const suitable = Object.entries(hut.suitable).filter(([, v]) => v);
-  const [availability, setAvailability] = useState<HutAvailability[]>([]);
-  const [availabilityLoading, setAvailabilityLoading] = useState(false);
-  const [availabilityError, setAvailabilityError] = useState(false);
-  const [availabilityFetched, setAvailabilityFetched] = useState(false);
 
   const now = new Date();
   const monthIndex = calendarMonthIndex(now);
   const currentOpening = currentMonthOpening(hut, now);
   const openingLabel = currentOpening !== undefined ? OPENING_LABEL[currentOpening] : 'Unknown';
 
-  useEffect(() => {
-    setAvailability([]);
-    setAvailabilityLoading(false);
-    setAvailabilityError(false);
-    setAvailabilityFetched(false);
-  }, [hut.id]);
-
-  useEffect(() => {
-    if (!detailsOpen || availabilityFetched) return;
-
-    let cancelled = false;
-    setAvailabilityLoading(true);
-    setAvailabilityError(false);
-
-    fetchAvailability(hut.apiId)
-      .then((data) => {
-        if (!cancelled) setAvailability(data);
-      })
-      .catch(() => {
-        if (!cancelled) {
-          setAvailabilityError(true);
-          setAvailability([]);
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setAvailabilityLoading(false);
-          setAvailabilityFetched(true);
-        }
-      });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [detailsOpen, hut.apiId, availabilityFetched]);
-
   return (
     <article
-      id={`hut-card-${hut.id}`}
       className={`hut-card${isHighlighted ? ' hut-card--highlighted' : ''}`}
       onMouseEnter={onHoverStart}
       onMouseLeave={onHoverEnd}
@@ -150,14 +110,9 @@ export const HutCard: FC<HutCardProps> = ({
           {
             <div className="hut-card__availability-wrap">
               <span className="hut-card__label">Availability</span>
-              {availabilityLoading && <span className="hut-card__chip hut-card__chip--muted">Loading…</span>}
-              {availabilityError && !availabilityLoading && (
-                <span className="hut-card__chip hut-card__chip--muted">Could not load</span>
-              )}
-              {!availabilityLoading && !availabilityError && availability.length === 0 && availabilityFetched && (
+              {availability.length === 0 ? (
                 <span className="hut-card__chip hut-card__chip--muted">No dates listed</span>
-              )}
-              {!availabilityLoading && !availabilityError && availability.length > 0 && (
+              ) : (
                 <ul className="hut-card__availability" aria-label="Bed availability by date">
                   {availability.map((day) => {
                     const availabilityPercentage = availabilityLevel(day.freeBeds, day.totalSleepingPlaces);
@@ -241,4 +196,4 @@ export const HutCard: FC<HutCardProps> = ({
       </details>
     </article>
   );
-};
+});

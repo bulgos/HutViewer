@@ -1,6 +1,8 @@
 import L from 'leaflet';
+import { EMPTY_AVAILABILITY, type AvailabilityByHutId } from '../hut-data/availabilityStore';
 import type { HutAvailability } from '../hut-data/hut-availability';
 import type { HutType } from '../hut-data/HutType';
+import { hutHasAvailabilityData } from './hutAvailabilityData';
 import { pickAvailabilityDay } from './pickAvailabilityDay';
 import type { AreaBounds, HutFilterState } from './types';
 
@@ -8,7 +10,7 @@ const MIN_AREA_DEG = 0.02;
 
 export function normalizeAreaBounds(
   cornerA: { lat: number; lng: number },
-  cornerB: { lat: number; lng: number },
+  cornerB: { lat: number; lng: number }
 ): AreaBounds | null {
   const south = Math.min(cornerA.lat, cornerB.lat);
   const north = Math.max(cornerA.lat, cornerB.lat);
@@ -21,7 +23,7 @@ export function normalizeAreaBounds(
 
   return [
     [south, west],
-    [north, east],
+    [north, east]
   ];
 }
 
@@ -41,33 +43,37 @@ function hutMatchesSuitable(hut: HutType, required: HutFilterState['requiredSuit
   return required.every((key) => hut.suitable[key] === true);
 }
 
-function hutMatchesAvailability(
-  hut: HutType,
-  filters: HutFilterState,
-  availabilityByHutId: Record<number, HutAvailability[]>,
-): boolean {
-  if (filters.availabilityMode === 'any') return true;
-  // Private huts don't have reservation availability data; don't exclude them from results.
-  if (hut.is_private) return true;
+/** Night has reservation data with a non-zero capacity (excludes “no dates listed” / 0 max beds). */
+function hasBookableNight(day: HutAvailability | undefined): day is HutAvailability {
+  return day !== undefined && day.totalSleepingPlaces > 0;
+}
 
-  const days = availabilityByHutId[hut.id];
-  if (!days || days.length === 0) return false;
+function hutMatchesReservationDataVisibility(filters: HutFilterState, days: HutAvailability[]): boolean {
+  if (!filters.hideHutsWithoutReservationData) {
+    return true;
+  }
+  const hasData = hutHasAvailabilityData(days, filters.availabilityDate);
+  if (filters.hideHutsWithoutReservationData && !hasData) return false;
+  return true;
+}
+
+function hutMatchesBedAvailability(filters: HutFilterState, days: HutAvailability[]): boolean {
+  if (filters.availabilityMode === 'any') return true;
+
+  if (days.length === 0) return false;
 
   const day = pickAvailabilityDay(days, filters.availabilityDate);
-  if (!day) return false;
+  if (!hasBookableNight(day)) return false;
 
   if (filters.availabilityMode === 'fullyFree') {
-    return day.totalSleepingPlaces > 0 && day.freeBeds >= day.totalSleepingPlaces;
+    return day.freeBeds >= day.totalSleepingPlaces;
   }
 
   return day.freeBeds >= Math.max(0, filters.minFreeBeds);
 }
 
 /** Apply filters that do not need reservation API data. */
-export function applyHutFiltersWithoutAvailability(
-  huts: HutType[],
-  filters: HutFilterState,
-): HutType[] {
+export function applyHutFiltersWithoutAvailability(huts: HutType[], filters: HutFilterState): HutType[] {
   return huts.filter((hut) => {
     if (filters.areaBounds && !hutInArea(hut, filters.areaBounds)) return false;
     if (!hutMatchesServices(hut, filters.requiredServices)) return false;
@@ -79,9 +85,11 @@ export function applyHutFiltersWithoutAvailability(
 export function applyHutFilters(
   huts: HutType[],
   filters: HutFilterState,
-  availabilityByHutId: Record<number, HutAvailability[]>,
+  availabilityByHutId: AvailabilityByHutId = new Map()
 ): HutType[] {
-  return applyHutFiltersWithoutAvailability(huts, filters).filter((hut) =>
-    hutMatchesAvailability(hut, filters, availabilityByHutId),
-  );
+  return applyHutFiltersWithoutAvailability(huts, filters).filter((hut) => {
+    const days = availabilityByHutId.get(hut.id) ?? hut.availability ?? EMPTY_AVAILABILITY;
+    if (!hutMatchesReservationDataVisibility(filters, days)) return false;
+    return hutMatchesBedAvailability(filters, days);
+  });
 }

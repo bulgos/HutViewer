@@ -10,18 +10,24 @@
 .hut-list {
   display: flex;
   flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
   gap: 8px;
   overflow-y: auto;
   padding: 2px 6px 2px 2px;
   margin: 0;
   text-align: left;
   scrollbar-gutter: stable;
-  align-items: stretch;
 }
 
-/* Prevent flex from squashing cards into thin stripes inside the scroll column */
-.hut-list > .hut-card {
+.hut-list__item {
   flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.hut-card--placeholder {
+  pointer-events: none;
+  opacity: 0.55;
 }
 
 .hut-list::-webkit-scrollbar {

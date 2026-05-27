@@ -1,3 +1,4 @@
+import type { HutAvailability } from '../../hut-data/hut-availability';
 import type { OpeningType, HutType } from '../../hut-data/HutType';
 import type { HutTypeApi } from './type';
 
@@ -23,7 +24,7 @@ const mapOpeningToOpeningType = (data: HutTypeApi['opening']): OpeningType[] =>
     .sort((a, b) => a[0].localeCompare(b[0]))
     .map(([_, value]) => (value === 2 ? 'open' : value === 1 ? 'serviced' : 'closed'));
 
-export const mapDataToHutType = (data: HutTypeApi): HutType => ({
+export const mapDataToHutType = (data: HutTypeApi, availability: HutAvailability[] = []): HutType => ({
   location: swissToWgs84(...data.geom.coordinates),
   geographical_name: data.geographical_name,
   sleeps: data.sleeps,
@@ -34,5 +35,6 @@ export const mapDataToHutType = (data: HutTypeApi): HutType => ({
   openings: mapOpeningToOpeningType(data.opening),
   services: data.services,
   suitable: data.suitable,
+  availability,
   rawData: data
 });
