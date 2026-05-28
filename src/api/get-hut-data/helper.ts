@@ -22,7 +22,7 @@ const swissToWgs84 = (E: number, N: number): [number, number] => {
 const mapOpeningToOpeningType = (data: HutTypeApi['opening']): OpeningType[] =>
   Object.entries(data)
     .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([_, value]) => (value === 2 ? 'open' : value === 1 ? 'serviced' : 'closed'));
+    .map(([_, value]) => (value === 2 ? 'closed' : value === 1 ? 'open' : 'serviced'));
 
 export const mapDataToHutType = (data: HutTypeApi, availability: HutAvailability[] = []): HutType => ({
   location: swissToWgs84(...data.geom.coordinates),
