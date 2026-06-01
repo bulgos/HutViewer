@@ -21,7 +21,7 @@ export async function loadHutsWithAvailability(
   if (isCancelled()) return;
   onHutsLoaded(huts);
 
-  const toFetch = huts.filter((h) => !h.is_private && h.apiId !== null);
+  const toFetch = huts.filter((h) => h.apiId !== null);
   const total = toFetch.length;
   onProgress(0, total);
   if (total === 0) return;

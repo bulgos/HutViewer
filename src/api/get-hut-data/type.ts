@@ -79,7 +79,21 @@ const ExampleHut = {
     climbing_kids: false,
     mountain_hiking: true,
     ski_snowboard_tour: true
-  }
+  },
+  addresses: [],
+  tourism_id: null,
+  name_internet: 'Capanna Lego',
+  association_id: 3,
+  emergency_shelter: 12,
+  photos: [],
+  regions: [{ region_id: 5 }],
+  regions_denormalization: 'Ticino',
+  reviewer_ok: false,
+  small_changes_ok: false,
+  status: 'published',
+  type: 'hut',
+  version: 1,
+  nb_routes: 8
 } as const;
 
 export type HutTypeApi = typeof ExampleHut;

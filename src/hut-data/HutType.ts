@@ -28,6 +28,7 @@ type SuitabilityMap = Partial<{
 }>;
 
 export type HutType = {
+  type: string;
   location: [number, number];
   geographical_name: string;
   sleeps: number;

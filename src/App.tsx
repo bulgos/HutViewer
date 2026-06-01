@@ -93,6 +93,8 @@ function App() {
     };
   }, [scheduleBatch]);
 
+  console.log([...new Set(huts.map((h) => h.type))]);
+
   const showAvailabilityProgress =
     availabilityLoading || (availabilityProgress.total > 0 && availabilityProgress.loaded < availabilityProgress.total);
 

@@ -13,6 +13,3 @@ export const fetchHutList = async (): Promise<HutType[]> => {
   const data = (await response.json()) as { results: HutTypeApi[] };
   return data.results.map((hut) => mapDataToHutType(hut, []));
 };
-
-/** @deprecated Use fetchHutList — availability is merged on the hut in App. */
-export const fetchAllInformation = fetchHutList;
