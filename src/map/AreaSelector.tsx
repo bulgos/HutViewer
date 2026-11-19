@@ -1,6 +1,6 @@
 import L from 'leaflet';
 import { useEffect, useRef, useState } from 'react';
-import { Rectangle, useMap, useMapEvents } from 'react-leaflet';
+import { Rectangle, useMap } from 'react-leaflet';
 import { normalizeAreaBounds } from '../filters/applyHutFilters';
 import type { AreaBounds } from '../filters/types';
 
@@ -33,6 +33,10 @@ export function AreaSelector({
   const map = useMap();
   const anchorRef = useRef<L.LatLng | null>(null);
   const [draftBounds, setDraftBounds] = useState<AreaBounds | null>(null);
+  const callbacksRef = useRef({ onBoundsChange, onDrawEnd, onDrawRejected });
+  useEffect(() => {
+    callbacksRef.current = { onBoundsChange, onDrawEnd, onDrawRejected };
+  });
 
   useEffect(() => {
     if (!drawActive) {
@@ -41,37 +45,35 @@ export function AreaSelector({
       return;
     }
     map.dragging.disable();
+    map.touchZoom.disable();
     map.doubleClickZoom.disable();
     map.boxZoom.disable();
     const container = map.getContainer();
     container.style.cursor = 'crosshair';
-    return () => {
-      map.dragging.enable();
-      map.doubleClickZoom.enable();
-      map.boxZoom.enable();
-      container.style.cursor = '';
-    };
-  }, [drawActive, map]);
+    container.style.touchAction = 'none';
 
-  useMapEvents({
-    mousedown(e) {
-      if (!drawActive) return;
-      L.DomEvent.stopPropagation(e.originalEvent);
-      L.DomEvent.preventDefault(e.originalEvent);
-      anchorRef.current = e.latlng;
-      setDraftBounds(cornersToBounds(e.latlng, e.latlng));
-    },
-    mousemove(e) {
+    // pointer events, so drawing works with a mouse and with a finger
+    const onDown = (e: PointerEvent) => {
+      if (!e.isPrimary || (e.target as Element).closest('.leaflet-control')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      container.setPointerCapture(e.pointerId);
+      const latlng = map.mouseEventToLatLng(e);
+      anchorRef.current = latlng;
+      setDraftBounds(cornersToBounds(latlng, latlng));
+    };
+    const onMove = (e: PointerEvent) => {
       const anchor = anchorRef.current;
-      if (!drawActive || !anchor) return;
-      L.DomEvent.stopPropagation(e.originalEvent);
-      setDraftBounds(cornersToBounds(anchor, e.latlng));
-    },
-    mouseup(e) {
+      if (!anchor || !e.isPrimary) return;
+      e.stopPropagation();
+      setDraftBounds(cornersToBounds(anchor, map.mouseEventToLatLng(e)));
+    };
+    const onUp = (e: PointerEvent) => {
       const anchor = anchorRef.current;
-      if (!drawActive || !anchor) return;
-      L.DomEvent.stopPropagation(e.originalEvent);
-      const normalized = normalizeAreaBounds(anchor, e.latlng);
+      if (!anchor || !e.isPrimary) return;
+      e.stopPropagation();
+      const { onBoundsChange, onDrawEnd, onDrawRejected } = callbacksRef.current;
+      const normalized = normalizeAreaBounds(anchor, map.mouseEventToLatLng(e));
       if (normalized) {
         onBoundsChange(normalized);
       } else {
@@ -80,8 +82,23 @@ export function AreaSelector({
       anchorRef.current = null;
       setDraftBounds(null);
       onDrawEnd();
-    },
-  });
+    };
+
+    container.addEventListener('pointerdown', onDown, true);
+    container.addEventListener('pointermove', onMove, true);
+    container.addEventListener('pointerup', onUp, true);
+    return () => {
+      container.removeEventListener('pointerdown', onDown, true);
+      container.removeEventListener('pointermove', onMove, true);
+      container.removeEventListener('pointerup', onUp, true);
+      map.dragging.enable();
+      map.touchZoom.enable();
+      map.doubleClickZoom.enable();
+      map.boxZoom.enable();
+      container.style.cursor = '';
+      container.style.touchAction = '';
+    };
+  }, [drawActive, map]);
 
   const areaStyle = {
     color: '#aa3bff',

@@ -20,13 +20,18 @@ type Props = {
   huts: HutType[];
   availabilityByHutId: AvailabilityByHutId;
   availabilityDate: string;
+  selectedHutId: number | null;
   onMarkerSelect: (hut: HutType) => void;
 };
+
+/** Selected marker: an accent ring, so it stays findable on touch screens without hover. */
+const SELECTED_RING = { color: '#aa3bff', weight: 4, opacity: 1, fillOpacity: 1 };
 
 type MarkerProps = {
   hut: HutType;
   availability: HutAvailability[];
   availabilityDate: string;
+  selected: boolean;
   onMarkerSelect: (hut: HutType) => void;
   registerMarker: (hutId: number, layer: LeafletCircleMarker | null) => void;
 };
@@ -35,18 +40,25 @@ const HutMapMarkerLayer = memo(function HutMapMarkerLayer({
   hut,
   availability,
   availabilityDate,
+  selected,
   onMarkerSelect,
   registerMarker,
 }: MarkerProps) {
+  const layerRef = useRef<LeafletCircleMarker | null>(null);
   const highlighted = useIsHutHovered(hut.id);
   const { hoverHut, unhoverHut } = useHutHoverActions();
 
   const pathOptions = useMemo(() => {
     const base = hutMarkerPathOptions(hut, availability, availabilityDate);
+    if (selected) return { ...base, ...SELECTED_RING };
     return highlighted ? { ...base, weight: 4, opacity: 1, fillOpacity: 1 } : base;
-  }, [hut, availability, availabilityDate, highlighted]);
+  }, [hut, availability, availabilityDate, highlighted, selected]);
 
-  const radius = highlighted ? 11 : 7;
+  const radius = highlighted || selected ? 11 : 7;
+
+  useEffect(() => {
+    if (selected) layerRef.current?.bringToFront();
+  }, [selected]);
 
   const eventHandlers = useMemo(
     () => ({
@@ -59,7 +71,10 @@ const HutMapMarkerLayer = memo(function HutMapMarkerLayer({
 
   return (
     <CircleMarker
-      ref={(layer) => registerMarker(hut.id, layer)}
+      ref={(layer) => {
+        layerRef.current = layer;
+        registerMarker(hut.id, layer);
+      }}
       center={hut.location}
       radius={radius}
       pathOptions={pathOptions}
@@ -73,7 +88,7 @@ function clearLayerTooltip(layer: LeafletCircleMarker) {
   layer.unbindTooltip();
 }
 
-export function HutMapMarkers({ huts, availabilityByHutId, availabilityDate, onMarkerSelect }: Props) {
+export function HutMapMarkers({ huts, availabilityByHutId, availabilityDate, selectedHutId, onMarkerSelect }: Props) {
   const markerLayersRef = useRef<Map<number, LeafletCircleMarker>>(new Map());
   const hoveredHutId = useHoveredHutId();
 
@@ -114,6 +129,7 @@ export function HutMapMarkers({ huts, availabilityByHutId, availabilityDate, onM
           hut={hut}
           availability={getHutAvailability(hut.id, availabilityByHutId)}
           availabilityDate={availabilityDate}
+          selected={hut.id === selectedHutId}
           onMarkerSelect={onMarkerSelect}
           registerMarker={registerMarker}
         />

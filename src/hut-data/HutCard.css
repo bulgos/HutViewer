@@ -151,7 +151,7 @@
 }
 
 .hut-card__map-btn {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   padding: 3px 7px;
   border-radius: 6px;
@@ -196,7 +196,7 @@
   flex-wrap: wrap;
   gap: 4px;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   padding: 2px 8px;
   border-radius: 999px;
@@ -244,7 +244,7 @@
 
 .hut-card__badge {
   flex-shrink: 0;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -285,7 +285,7 @@
   list-style: none;
   cursor: pointer;
   padding: 7px 12px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.03em;
   color: var(--text-h);
@@ -345,7 +345,7 @@
 }
 
 .hut-card__label {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -384,7 +384,7 @@
   min-width: 0;
   border-radius: 2px;
   border: 1px solid var(--border);
-  font-size: 7px;
+  font-size: 8px;
   text-align: center;
   height: 20px;
   cursor: default;
@@ -416,7 +416,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 6px 10px;
-  font-size: 9px;
+  font-size: 10px;
   color: var(--text);
 }
 
@@ -455,7 +455,7 @@
 }
 
 .hut-card__chip {
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.15;
   padding: 2px 6px;
   border-radius: 999px;
@@ -493,7 +493,7 @@
   grid-template-columns: minmax(4.5rem, 1fr) auto auto;
   align-items: center;
   gap: 8px;
-  font-size: 10px;
+  font-size: 11px;
   line-height: 1.25;
   padding: 4px 6px;
   border-radius: 6px;
@@ -529,7 +529,7 @@
 }
 
 .hut-card__availability-status {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: 0.02em;
   text-transform: uppercase;
