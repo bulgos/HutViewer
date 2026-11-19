@@ -20,12 +20,12 @@ import { AreaSelector } from './map/AreaSelector';
 import { HutMapMarkers } from './map/HutMapMarkers';
 import { MapFlyToHut, type MapFocusRequest } from './map/MapFlyToHut';
 import { MapInitialView } from './map/MapInitialView';
-import { MapMarkerLegend } from './map/MapMarkerLegend';
+import { MapLegendBody, MapMarkerLegend } from './map/MapMarkerLegend';
 import { usePanelInsets } from './map/usePanelInsets';
 import { HutViewerLogo } from './brand/HutViewerLogo';
 import { MOBILE_QUERY, useMediaQuery } from './useMediaQuery';
 
-type MobileTab = 'filters' | 'results';
+type MobileTab = 'filters' | 'results' | 'legend';
 
 const Chevron = () => (
   <svg className="hut-panel__chevron" viewBox="0 0 16 16" width="14" height="14" aria-hidden focusable="false">
@@ -213,7 +213,7 @@ function App() {
             onMarkerSelect={handleMarkerSelect}
           />
         </MapContainer>
-        <MapMarkerLegend defaultOpen={!isMobile} />
+        {!isMobile && <MapMarkerLegend />}
         {drawAreaActive && (
           <div className="map-draw-hint" role="status">
             Drag on the map to mark the search area
@@ -258,6 +258,15 @@ function App() {
                 onClick={() => handleMobileTab('results')}
               >
                 Results {resultsCount}
+              </button>
+              <button
+                type="button"
+                role="tab"
+                className="hut-tabs__tab"
+                aria-selected={mobileTab === 'legend'}
+                onClick={() => handleMobileTab('legend')}
+              >
+                Legend
               </button>
             </div>
           </header>
@@ -326,6 +335,18 @@ function App() {
                 </div>
               </div>
             </aside>
+            {isMobile && (
+              <aside
+                className={`hut-panel hut-panel--legend${mobileTab === 'legend' ? '' : ' hut-panel--collapsed'}`}
+                aria-label="Map legend"
+              >
+                <div className="hut-panel__expandable">
+                  <div className="hut-panel__expandable-inner hut-filters map-legend__body">
+                    <MapLegendBody />
+                  </div>
+                </div>
+              </aside>
+            )}
           </div>
           <HutDetailAsidePanel
             hut={selectedHut}

@@ -60,18 +60,3 @@
 .map-legend .hut-filters__hint {
   margin: 0 0 6px;
 }
-
-/* phone: top-left under the zoom buttons, clear of the bottom sheet */
-@media (max-width: 640px) {
-  .map-legend {
-    top: calc(84px + env(safe-area-inset-top));
-    left: 10px;
-    bottom: auto;
-    max-height: calc(100dvh - 400px);
-  }
-
-  .map-legend:not(.hut-panel--collapsed) > .hut-panel__expandable {
-    max-height: calc(100dvh - 440px);
-    overflow-y: auto;
-  }
-}

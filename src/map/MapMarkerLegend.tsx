@@ -46,9 +46,34 @@ function LegendRow({ fill, stroke, label, dimmed }: { fill: string; stroke: stri
   );
 }
 
-/** `defaultOpen` is false on phones, where the legend would cover too much of the map. */
-export const MapMarkerLegend = ({ defaultOpen = true }: { defaultOpen?: boolean }) => {
-  const [open, setOpen] = useState(() => defaultOpen && !readLegendDismissed());
+/** The two marker lists; used in the floating legend and in the phone sheet. */
+export const MapLegendBody = () => (
+  <>
+    <fieldset className="hut-filters__group">
+      <legend className="hut-filters__legend">Bed occupancy</legend>
+      <ul className="map-legend__list">
+        {AVAILABILITY_LEGEND.map(({ status, label }) => {
+          const { fill, stroke } = AVAILABILITY_MARKER_PALETTE[status];
+          return <LegendRow key={status} fill={fill} stroke={stroke} label={label} />;
+        })}
+      </ul>
+    </fieldset>
+    <fieldset className="hut-filters__group">
+      <legend className="hut-filters__legend">Opening (this month)</legend>
+      <p className="hut-filters__hint">Faded: no bed data for the date.</p>
+      <ul className="map-legend__list">
+        {OPENING_LEGEND.map((kind) => {
+          const { fill, stroke } = OPENING_MARKER_PALETTE[kind];
+          return <LegendRow key={kind} fill={fill} stroke={stroke} label={OPENING_LABEL[kind]} dimmed />;
+        })}
+      </ul>
+    </fieldset>
+  </>
+);
+
+/** Floating legend, desktop only (on phones the legend is a tab in the sheet). */
+export const MapMarkerLegend = () => {
+  const [open, setOpen] = useState(() => !readLegendDismissed());
 
   const toggleLegend = () => {
     setOpen((wasOpen) => {
@@ -73,25 +98,7 @@ export const MapMarkerLegend = ({ defaultOpen = true }: { defaultOpen?: boolean 
       </button>
       <div className="hut-panel__expandable">
         <div id="map-marker-legend-body" className="hut-panel__expandable-inner map-legend__body hut-filters">
-          <fieldset className="hut-filters__group">
-            <legend className="hut-filters__legend">Bed occupancy</legend>
-            <ul className="map-legend__list">
-              {AVAILABILITY_LEGEND.map(({ status, label }) => {
-                const { fill, stroke } = AVAILABILITY_MARKER_PALETTE[status];
-                return <LegendRow key={status} fill={fill} stroke={stroke} label={label} />;
-              })}
-            </ul>
-          </fieldset>
-          <fieldset className="hut-filters__group">
-            <legend className="hut-filters__legend">Opening (this month)</legend>
-            <p className="hut-filters__hint">Faded: no bed data for the date.</p>
-            <ul className="map-legend__list">
-              {OPENING_LEGEND.map((kind) => {
-                const { fill, stroke } = OPENING_MARKER_PALETTE[kind];
-                return <LegendRow key={kind} fill={fill} stroke={stroke} label={OPENING_LABEL[kind]} dimmed />;
-              })}
-            </ul>
-          </fieldset>
+          <MapLegendBody />
         </div>
       </div>
     </aside>
