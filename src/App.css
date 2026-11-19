@@ -302,7 +302,7 @@ button.hut-panel__chrome:focus-visible {
     display: block;
     align-self: center;
     width: 64px;
-    height: 18px;
+    height: 12px;
     padding: 0;
     border: none;
     background: none;
@@ -346,41 +346,55 @@ button.hut-panel__chrome:focus-visible {
   }
 
   .hut-brand {
-    padding: 4px 12px 8px;
-    gap: 8px;
+    padding: 0 10px 6px;
+    gap: 6px;
+  }
+
+  .hut-brand__row {
+    min-height: 28px;
   }
 
   .hut-tabs {
     display: flex;
-    gap: 4px;
-    padding: 3px;
-    border-radius: 10px;
+    gap: 2px;
+    padding: 2px;
+    border-radius: 9px;
     background: var(--social-bg);
     border: 1px solid var(--border);
   }
 
+  /* tabs grow from their content width, so "Results 191" never gets squeezed */
   .hut-tabs__tab {
-    flex: 1 1 0;
+    flex: 1 1 auto;
     min-width: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
-    min-height: 36px;
+    gap: 4px;
+    min-height: 28px;
+    padding: 0 6px;
     border: none;
-    border-radius: 8px;
+    border-radius: 7px;
     background: none;
     font: inherit;
-    font-size: 14px;
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
     font-weight: 600;
     color: var(--text);
     cursor: pointer;
   }
 
+  /* same font as the label, so both share one centre line */
   .hut-tabs__count {
+    padding: 2px 5px;
+    border-radius: 999px;
+    background: var(--accent-bg);
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
-    font-weight: 500;
-    color: var(--text);
+    color: var(--text-h);
   }
 
   .hut-tabs__label {
@@ -394,13 +408,14 @@ button.hut-panel__chrome:focus-visible {
     flex: 0 1 0;
     min-width: 0;
     max-width: 0;
-    margin-left: -4px;
+    margin-left: -2px;
     padding: 0;
     opacity: 0;
     overflow: hidden;
     pointer-events: none;
     transition:
       flex-grow 0.25s ease,
+      flex-basis 0.25s ease,
       max-width 0.25s ease,
       margin-left 0.25s ease,
       padding 0.25s ease,
@@ -408,8 +423,9 @@ button.hut-panel__chrome:focus-visible {
   }
 
   .hut-tabs__tab--hut.hut-tabs__tab--shown {
-    flex-grow: 1.3;
-    max-width: 36%;
+    flex-grow: 1;
+    flex-basis: 28%;
+    max-width: 34%;
     margin-left: 0;
     padding: 0 8px;
     opacity: 1;
