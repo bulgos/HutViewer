@@ -162,6 +162,7 @@ function App() {
             huts={mapHuts}
             availabilityByHutId={availabilityByHutId}
             availabilityDate={filters.availabilityDate}
+            selectedHutId={selectedHutId}
             onMarkerSelect={handleMarkerSelect}
           />
         </MapContainer>
