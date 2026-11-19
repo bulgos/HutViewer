@@ -6,11 +6,11 @@ import '../filters/HutFilters.css';
 import './MapMarkerLegend.css';
 
 const AVAILABILITY_LEGEND: { status: AvailabilityStatus; label: string }[] = [
-  { status: 'full', label: 'Full (≥99% booked)' },
+  { status: 'full', label: 'Full (≥99%)' },
   { status: 'nearly-full', label: 'Nearly full (≥70%)' },
   { status: 'half-full', label: 'Half full (≥40%)' },
   { status: 'low', label: 'Low (≥1%)' },
-  { status: 'empty', label: 'Empty (all beds free)' }
+  { status: 'empty', label: 'All beds free' }
 ];
 
 const OPENING_LEGEND: OpeningType[] = ['closed', 'open', 'serviced'];
@@ -46,8 +46,9 @@ function LegendRow({ fill, stroke, label, dimmed }: { fill: string; stroke: stri
   );
 }
 
-export const MapMarkerLegend = () => {
-  const [open, setOpen] = useState(() => !readLegendDismissed());
+/** `defaultOpen` is false on phones, where the legend would cover too much of the map. */
+export const MapMarkerLegend = ({ defaultOpen = true }: { defaultOpen?: boolean }) => {
+  const [open, setOpen] = useState(() => defaultOpen && !readLegendDismissed());
 
   const toggleLegend = () => {
     setOpen((wasOpen) => {
@@ -58,20 +59,18 @@ export const MapMarkerLegend = () => {
 
   return (
     <aside className={`hut-panel map-legend${open ? '' : ' hut-panel--collapsed'}`} aria-label="Map legend">
-      <div className="hut-panel__chrome">
-        <button
-          type="button"
-          className="hut-panel__toggle"
-          onClick={toggleLegend}
-          aria-expanded={open}
-          aria-controls="map-marker-legend-body"
-          aria-label={open ? 'Collapse legend' : 'Expand legend'}
-          title={open ? 'Collapse legend' : 'Expand legend'}
-        >
-          {open ? '▼' : '▲'}
-        </button>
+      <button
+        type="button"
+        className="hut-panel__chrome"
+        onClick={toggleLegend}
+        aria-expanded={open}
+        aria-controls="map-marker-legend-body"
+      >
+        <svg className="hut-panel__chevron" viewBox="0 0 16 16" width="14" height="14" aria-hidden focusable="false">
+          <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
         <span className="hut-panel__rail-label">Legend</span>
-      </div>
+      </button>
       <div className="hut-panel__expandable">
         <div id="map-marker-legend-body" className="hut-panel__expandable-inner map-legend__body hut-filters">
           <fieldset className="hut-filters__group">
@@ -85,7 +84,7 @@ export const MapMarkerLegend = () => {
           </fieldset>
           <fieldset className="hut-filters__group">
             <legend className="hut-filters__legend">Opening (this month)</legend>
-            <p className="hut-filters__hint">Used when no bed data for the selected date (50% opacity).</p>
+            <p className="hut-filters__hint">Faded: no bed data for the date.</p>
             <ul className="map-legend__list">
               {OPENING_LEGEND.map((kind) => {
                 const { fill, stroke } = OPENING_MARKER_PALETTE[kind];

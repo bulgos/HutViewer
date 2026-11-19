@@ -18,9 +18,20 @@ import { HutDetailAsidePanel } from './hut-data/HutDetailAside';
 import { HutList } from './hut-data/HutList';
 import { AreaSelector } from './map/AreaSelector';
 import { HutMapMarkers } from './map/HutMapMarkers';
-import { MapFlyToHut } from './map/MapFlyToHut';
+import { MapFlyToHut, type MapFocusRequest } from './map/MapFlyToHut';
+import { MapInitialView } from './map/MapInitialView';
 import { MapMarkerLegend } from './map/MapMarkerLegend';
-import { useRightPanelWidth } from './map/useRightPanelWidth';
+import { usePanelInsets } from './map/usePanelInsets';
+import { HutViewerLogo } from './brand/HutViewerLogo';
+import { MOBILE_QUERY, useMediaQuery } from './useMediaQuery';
+
+type MobileTab = 'filters' | 'results';
+
+const Chevron = () => (
+  <svg className="hut-panel__chevron" viewBox="0 0 16 16" width="14" height="14" aria-hidden focusable="false">
+    <path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 
 function App() {
   const [huts, setHuts] = useState<HutType[]>([]);
@@ -30,7 +41,9 @@ function App() {
   const [selectedHutId, setSelectedHutId] = useState<number | null>(null);
   const [resultsOpen, setResultsOpen] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(true);
-  const [mapFocusHut, setMapFocusHut] = useState<HutType | null>(null);
+  const [mobileTab, setMobileTab] = useState<MobileTab | null>('results');
+  const [mapFocus, setMapFocus] = useState<MapFocusRequest | null>(null);
+  const isMobile = useMediaQuery(MOBILE_QUERY);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityProgress, setAvailabilityProgress] = useState({ loaded: 0, total: 0 });
   const { availabilityByHutId, scheduleBatch } = useBatchedAvailabilityUpdates();
@@ -44,7 +57,7 @@ function App() {
   useFilterUrlSync(filters, setFiltersTransition);
 
   const panelsRef = useRef<HTMLDivElement>(null);
-  const mapPaddingRight = useRightPanelWidth(panelsRef);
+  const getInsets = usePanelInsets(panelsRef, isMobile);
 
   const hutsBeforeAvailability = useMemo(() => applyHutFiltersWithoutAvailability(huts, filters), [huts, filters]);
 
@@ -102,15 +115,29 @@ function App() {
     [huts, selectedHutId]
   );
 
-  const handleSelectHut = useCallback((hut: HutType) => {
-    setSelectedHutId(hut.id);
+  const requestMapFocus = useCallback((hut: HutType, keepZoom: boolean) => {
+    setMapFocus((prev) => ({ hut, keepZoom, nonce: (prev?.nonce ?? 0) + 1 }));
   }, []);
+
+  const handleSelectHut = useCallback(
+    (hut: HutType) => {
+      setSelectedHutId(hut.id);
+      // on a phone the detail sheet covers the lower half; keep the hut in view above it
+      if (isMobile) requestMapFocus(hut, true);
+    },
+    [isMobile, requestMapFocus]
+  );
 
   const handleMarkerSelect = useCallback(
     (hut: HutType) => {
       flushSync(() => {
         setSelectedHutId(hut.id);
       });
+
+      if (isMobile) {
+        requestMapFocus(hut, true);
+        return;
+      }
 
       if (!resultsOpen) return;
 
@@ -121,16 +148,34 @@ function App() {
         });
       });
     },
-    [resultsOpen]
+    [isMobile, resultsOpen, requestMapFocus]
   );
 
-  const handleShowHutOnMap = useCallback((hut: HutType) => {
-    setMapFocusHut(hut);
-  }, []);
+  const handleShowHutOnMap = useCallback(
+    (hut: HutType) => {
+      if (isMobile) setSelectedHutId(hut.id);
+      requestMapFocus(hut, false);
+    },
+    [isMobile, requestMapFocus]
+  );
 
   const handleCloseHutDetails = useCallback(() => {
     setSelectedHutId(null);
   }, []);
+
+  const handleMobileTab = useCallback((tab: MobileTab) => {
+    setSelectedHutId(null);
+    setMobileTab((current) => (current === tab ? null : tab));
+  }, []);
+
+  const filtersExpanded = isMobile ? mobileTab === 'filters' : filtersOpen;
+  const resultsExpanded = isMobile ? mobileTab === 'results' : resultsOpen;
+
+  const resultsCount = (
+    <span className="hut-panel__rail-count">
+      {filteredHuts.length} / {huts.length}
+    </span>
+  );
 
   return (
     <HutHoverProvider>
@@ -139,6 +184,7 @@ function App() {
           style={{ height: '100%', width: '100%' }}
           center={[47, 8]}
           zoom={7}
+          zoomSnap={0.5}
           scrollWheelZoom={!drawAreaActive}
         >
           <TileLayer
@@ -157,7 +203,8 @@ function App() {
             onDrawEnd={() => setDrawAreaActive(false)}
             onDrawRejected={() => setAreaDrawHint('Area too small — drag a larger rectangle on the map.')}
           />
-          <MapFlyToHut hut={mapFocusHut} paddingRightPx={mapPaddingRight} />
+          <MapInitialView areaBounds={filters.areaBounds} getInsets={getInsets} />
+          <MapFlyToHut request={mapFocus} getInsets={getInsets} />
           <HutMapMarkers
             huts={mapHuts}
             availabilityByHutId={availabilityByHutId}
@@ -166,7 +213,7 @@ function App() {
             onMarkerSelect={handleMarkerSelect}
           />
         </MapContainer>
-        <MapMarkerLegend />
+        <MapMarkerLegend defaultOpen={!isMobile} />
         {drawAreaActive && (
           <div className="map-draw-hint" role="status">
             Drag on the map to mark the search area
@@ -177,87 +224,108 @@ function App() {
             {areaDrawHint}
           </div>
         )}
-        <div className="hut-panels-column" ref={panelsRef}>
-          <div className="hut-panels">
-          <aside
-            className={`hut-panel hut-panel--filters${filtersOpen ? '' : ' hut-panel--collapsed'}`}
-            aria-label="Hut filters"
-          >
-            <div className="hut-panel__chrome">
-              <button
-                type="button"
-                className="hut-panel__toggle"
-                onClick={() => setFiltersOpen((open) => !open)}
-                aria-expanded={filtersOpen}
-                aria-label={filtersOpen ? 'Collapse filters' : 'Expand filters'}
-                title={filtersOpen ? 'Collapse filters' : 'Expand filters'}
-              >
-                {filtersOpen ? '▲' : '▼'}
-              </button>
-              <span className="hut-panel__rail-label">Filters</span>
+        <div
+          className={`hut-panels-column${selectedHut ? ' hut-panels-column--detail' : ''}`}
+          ref={panelsRef}
+        >
+          <header className="hut-panel hut-brand">
+            <div className="hut-brand__row">
+              <HutViewerLogo className="hut-brand__logo" size={22} />
+              <h1 className="hut-brand__title">Hut Viewer</h1>
               <HutDatePanel
                 value={filters.availabilityDate}
                 onChange={(availabilityDate) => setFiltersTransition((f) => ({ ...f, availabilityDate }))}
-                trailing={
-                  showAvailabilityProgress ? (
-                    <AvailabilityLoadProgress loaded={availabilityProgress.loaded} total={availabilityProgress.total} />
-                  ) : null
-                }
               />
             </div>
-            <div className="hut-panel__expandable">
-              <div className="hut-panel__expandable-inner">
-                <HutFilters
-                  filters={filters}
-                  onChange={setFiltersTransition}
-                  drawAreaActive={drawAreaActive}
-                  onDrawAreaToggle={() => {
-                    setAreaDrawHint(null);
-                    setDrawAreaActive((v) => !v);
-                  }}
-                  onClearArea={() => setFiltersTransition((f) => ({ ...f, areaBounds: null }))}
-                  availabilityLoading={needAvailability && availabilityLoading}
-                  availabilityTargetCount={availabilityTargetCount}
-                  onResetAll={() => {
-                    setFiltersTransition(DEFAULT_HUT_FILTERS);
-                    setDrawAreaActive(false);
-                    setAreaDrawHint(null);
-                  }}
-                />
-              </div>
-            </div>
-          </aside>
-          <aside
-            className={`hut-panel hut-panel--results${resultsOpen ? '' : ' hut-panel--collapsed'}`}
-            aria-label="Hut results"
-          >
-            <div className="hut-panel__chrome">
+            {showAvailabilityProgress && (
+              <AvailabilityLoadProgress loaded={availabilityProgress.loaded} total={availabilityProgress.total} />
+            )}
+            <div className="hut-tabs" role="tablist" aria-label="Panels">
               <button
                 type="button"
-                className="hut-panel__toggle"
-                onClick={() => setResultsOpen((open) => !open)}
-                aria-expanded={resultsOpen}
-                aria-label={resultsOpen ? 'Collapse results' : 'Expand results'}
-                title={resultsOpen ? 'Collapse results' : 'Expand results'}
+                role="tab"
+                className="hut-tabs__tab"
+                aria-selected={mobileTab === 'filters'}
+                onClick={() => handleMobileTab('filters')}
               >
-                {resultsOpen ? '▲' : '▼'}
+                Filters
               </button>
-              <span className="hut-panel__rail-label">Results</span>
-              <span className="hut-panel__rail-count">
-                {filteredHuts.length} / {huts.length}
-              </span>
+              <button
+                type="button"
+                role="tab"
+                className="hut-tabs__tab"
+                aria-selected={mobileTab === 'results'}
+                onClick={() => handleMobileTab('results')}
+              >
+                Results {resultsCount}
+              </button>
             </div>
-            <div className="hut-panel__expandable">
-              <div className="hut-panel__expandable-inner">
-                <HutList
-                  huts={filteredHuts}
-                  selectedHutId={selectedHutId}
-                  onSelectHut={handleSelectHut}
-                  onShowOnMap={handleShowHutOnMap}
-                />
+          </header>
+          <div className="hut-panels">
+            <aside
+              className={`hut-panel hut-panel--filters${filtersExpanded ? '' : ' hut-panel--collapsed'}`}
+              aria-label="Hut filters"
+            >
+              <button
+                type="button"
+                className="hut-panel__chrome"
+                onClick={() => setFiltersOpen((open) => !open)}
+                aria-expanded={filtersExpanded}
+              >
+                <Chevron />
+                <span className="hut-panel__rail-label">Filters</span>
+              </button>
+              <div className="hut-panel__expandable">
+                <div className="hut-panel__expandable-inner">
+                  <HutFilters
+                    filters={filters}
+                    onChange={setFiltersTransition}
+                    drawAreaActive={drawAreaActive}
+                    onDrawAreaToggle={() => {
+                      setAreaDrawHint(null);
+                      setDrawAreaActive((v) => {
+                        // on a phone, get the sheet out of the way while drawing
+                        if (!v && isMobile) setMobileTab(null);
+                        return !v;
+                      });
+                    }}
+                    onClearArea={() => setFiltersTransition((f) => ({ ...f, areaBounds: null }))}
+                    availabilityLoading={needAvailability && availabilityLoading}
+                    availabilityTargetCount={availabilityTargetCount}
+                    onResetAll={() => {
+                      setFiltersTransition(DEFAULT_HUT_FILTERS);
+                      setDrawAreaActive(false);
+                      setAreaDrawHint(null);
+                    }}
+                  />
+                </div>
               </div>
-            </div>
-          </aside>
+            </aside>
+            <aside
+              className={`hut-panel hut-panel--results${resultsExpanded ? '' : ' hut-panel--collapsed'}`}
+              aria-label="Hut results"
+            >
+              <button
+                type="button"
+                className="hut-panel__chrome"
+                onClick={() => setResultsOpen((open) => !open)}
+                aria-expanded={resultsExpanded}
+              >
+                <Chevron />
+                <span className="hut-panel__rail-label">Results</span>
+                {resultsCount}
+              </button>
+              <div className="hut-panel__expandable">
+                <div className="hut-panel__expandable-inner">
+                  <HutList
+                    huts={filteredHuts}
+                    selectedHutId={selectedHutId}
+                    onSelectHut={handleSelectHut}
+                    onShowOnMap={handleShowHutOnMap}
+                  />
+                </div>
+              </div>
+            </aside>
           </div>
           <HutDetailAsidePanel
             hut={selectedHut}

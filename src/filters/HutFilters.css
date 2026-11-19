@@ -1,21 +1,10 @@
 .hut-filters {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
   flex: 1 1 auto;
   min-height: 0;
-  height: 100%;
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-}
-
-.hut-filters__title {
-  margin: 0 0 2px;
-  flex-shrink: 0;
-  font-family: var(--heading);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--text-h);
+  padding-bottom: 4px;
 }
 
 .hut-filters__group {
@@ -26,18 +15,13 @@
 }
 
 .hut-filters__legend {
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text);
-  opacity: 0.9;
   padding: 0;
   margin-bottom: 6px;
-}
-
-.hut-filters__legend--sub {
-  margin-top: 10px;
 }
 
 .hut-filters__row {
@@ -47,10 +31,12 @@
 }
 
 .hut-filters__btn {
-  font-size: 10px;
+  font: inherit;
+  font-size: 12px;
   font-weight: 600;
-  padding: 5px 10px;
-  border-radius: 6px;
+  min-height: 30px;
+  padding: 4px 12px;
+  border-radius: 8px;
   border: 1px solid var(--accent-border);
   background: var(--accent-bg);
   color: var(--text-h);
@@ -68,7 +54,7 @@
 }
 
 .hut-filters__btn--ghost {
-  background: var(--social-bg);
+  background: none;
   border-color: var(--border);
   color: var(--text);
 }
@@ -78,64 +64,109 @@
 }
 
 .hut-filters__hint {
-  margin: 4px 0 0;
-  font-size: 9px;
-  line-height: 1.35;
+  margin: 6px 0 0;
+  font-size: 11px;
+  line-height: 1.4;
   color: var(--text);
-  opacity: 0.85;
 }
 
 .hut-filters__hint--loading {
+  margin: 0 0 6px;
   color: var(--accent);
-  opacity: 1;
 }
 
 .hut-filters__radio {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
-  font-size: 10px;
+  gap: 8px;
+  min-height: 28px;
+  font-size: 13px;
   color: var(--text-h);
-  margin-bottom: 4px;
   cursor: pointer;
 }
 
+.hut-filters__radio input[type='radio'] {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
 .hut-filters__number {
-  width: 3rem;
+  width: 3.25rem;
   font-family: var(--mono);
-  font-size: 10px;
-  padding: 2px 4px;
-  border-radius: 4px;
+  font-size: 12px;
+  padding: 3px 6px;
+  border-radius: 6px;
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--text-h);
 }
 
+/* checkboxes as chips */
 .hut-filters__checks {
   display: flex;
   flex-wrap: wrap;
-  padding: 4px 0;
-  gap: 4px;
+  gap: 6px;
 }
 
 .hut-filters__check {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 10px;
-  padding: 0 4px;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  font-size: 12px;
   color: var(--text-h);
   cursor: pointer;
   user-select: none;
 }
 
-.hut-filters__check:has(input:checked) {
+.hut-filters__check:hover {
   border-color: var(--accent-border);
+}
+
+.hut-filters__check:has(input:checked) {
+  border-color: var(--accent);
   background: var(--accent-bg);
 }
 
+.hut-filters__check:has(input:checked)::before {
+  content: '✓';
+  margin-right: 5px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.hut-filters__check:has(input:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .hut-filters__check input {
-  margin: 0;
-  accent-color: var(--accent);
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 640px) {
+  .hut-filters__btn {
+    min-height: 36px;
+    font-size: 13px;
+  }
+
+  .hut-filters__radio {
+    min-height: 36px;
+    font-size: 14px;
+  }
+
+  .hut-filters__number {
+    font-size: 16px;
+  }
+
+  .hut-filters__check {
+    min-height: 34px;
+    font-size: 13px;
+  }
 }

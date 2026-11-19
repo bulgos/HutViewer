@@ -1,24 +1,29 @@
 .map-legend {
   position: fixed;
   z-index: 1000;
-  left: 4px;
-  bottom: 4px;
-  max-width: min(160px, calc(100vw - 56px));
-  max-height: min(50vh, 360px);
-  pointer-events: auto;
-}
-
-.map-legend.hut-panel--collapsed {
-  max-width: min(160px, calc(100vw - 56px));
-  max-height: 40px;
+  left: 8px;
+  bottom: 8px;
+  width: 168px;
+  max-height: min(60vh, 380px);
+  padding: 0 6px;
 }
 
 .map-legend:not(.hut-panel--collapsed) > .hut-panel__expandable {
-  max-height: min(50vh, 320px);
+  max-height: min(60vh, 340px);
+}
+
+.map-legend .hut-panel__chrome {
+  min-height: 36px;
 }
 
 .map-legend__body {
   min-height: 0;
+  gap: 10px;
+  padding: 0 6px;
+}
+
+.map-legend.hut-panel--collapsed {
+  width: auto;
 }
 
 .map-legend__list {
@@ -34,7 +39,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.3;
   color: var(--text-h);
 }
@@ -50,4 +55,23 @@
   border-radius: 50%;
   border: 2px solid;
   box-sizing: border-box;
+}
+
+.map-legend .hut-filters__hint {
+  margin: 0 0 6px;
+}
+
+/* phone: top-left under the zoom buttons, clear of the bottom sheet */
+@media (max-width: 640px) {
+  .map-legend {
+    top: calc(84px + env(safe-area-inset-top));
+    left: 10px;
+    bottom: auto;
+    max-height: calc(100dvh - 400px);
+  }
+
+  .map-legend:not(.hut-panel--collapsed) > .hut-panel__expandable {
+    max-height: calc(100dvh - 440px);
+    overflow-y: auto;
+  }
 }

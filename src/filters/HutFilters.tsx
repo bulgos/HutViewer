@@ -49,7 +49,7 @@ export const HutFilters: FC<Props> = ({
             className={`hut-filters__btn${drawAreaActive ? ' hut-filters__btn--active' : ''}`}
             onClick={onDrawAreaToggle}
           >
-            {drawAreaActive ? 'Drawing… drag on map' : 'Draw area on map'}
+            {drawAreaActive ? 'Drawing… drag on the map' : 'Draw area on map'}
           </button>
           {filters.areaBounds && (
             <button type="button" className="hut-filters__btn hut-filters__btn--ghost" onClick={onClearArea}>
@@ -59,8 +59,8 @@ export const HutFilters: FC<Props> = ({
         </div>
         <p className="hut-filters__hint">
           {filters.areaBounds
-            ? 'Only huts inside the marked rectangle are shown.'
-            : 'Optional: drag a rectangle on the map to limit results.'}
+            ? 'Only huts inside the rectangle are shown.'
+            : 'Drag a rectangle on the map to limit the results.'}
         </p>
       </fieldset>
 
@@ -102,11 +102,10 @@ export const HutFilters: FC<Props> = ({
             checked={filters.availabilityMode === 'fullyFree'}
             onChange={() => setAvailabilityMode('fullyFree')}
           />
-          Completely free (all beds available)
+          Completely free
         </label>
         <p className="hut-filters__hint">
-          Bed filters use the date from the Date panel. Huts without data for that night or with 0 beds listed are
-          hidden. Checks up to {availabilityTargetCount} huts already matching map / service / activity filters.
+          For the night picked at the top, checked on up to {availabilityTargetCount} huts.
         </p>
         <div className="hut-filters__checks">
           <label className="hut-filters__check">
@@ -115,13 +114,9 @@ export const HutFilters: FC<Props> = ({
               checked={filters.hideHutsWithoutReservationData}
               onChange={(e) => patch({ hideHutsWithoutReservationData: e.target.checked })}
             />
-            Hide huts without reservation data
+            Only huts with reservation data
           </label>
         </div>
-        <p className="hut-filters__hint">
-          Uses the date from the Date panel. “With data” means beds listed for that night; huts still loading count as
-          without data.
-        </p>
       </fieldset>
 
       <fieldset className="hut-filters__group">

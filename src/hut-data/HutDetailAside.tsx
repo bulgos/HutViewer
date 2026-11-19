@@ -48,7 +48,9 @@ export const HutDetailAsidePanel: FC<HutDetailAsidePanelProps> = ({
           aria-label="Close hut details"
           title="Close hut details"
         >
-          ×
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden focusable="false">
+            <path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
         </button>
         <span className="hut-panel__rail-label hut-panel__rail-label--truncate">
           {hut?.geographical_name ?? 'Details'}
