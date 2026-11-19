@@ -259,7 +259,13 @@ button.hut-panel__chrome:focus-visible {
   white-space: nowrap;
 }
 
-/* tabs only exist in the phone layout */
+/* the sheet wrappers, handle and tabs only matter in the phone layout */
+.hut-sheet-header,
+.hut-sheet-body {
+  display: contents;
+}
+
+.hut-sheet-handle,
 .hut-tabs {
   display: none;
 }
@@ -283,16 +289,53 @@ button.hut-panel__chrome:focus-visible {
     pointer-events: auto;
   }
 
-  /* grab handle */
-  .hut-panels-column::before {
-    content: '';
-    align-self: center;
+  /* handle + brand row: drag to resize the sheet */
+  .hut-sheet-header {
+    display: flex;
+    flex-direction: column;
     flex-shrink: 0;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .hut-sheet-handle {
+    display: block;
+    align-self: center;
+    width: 64px;
+    height: 18px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: grab;
+  }
+
+  .hut-sheet-handle::before {
+    content: '';
+    display: block;
     width: 36px;
     height: 4px;
-    margin-top: 6px;
+    margin: 0 auto;
     border-radius: 2px;
     background: var(--border);
+  }
+
+  .hut-sheet-handle:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    border-radius: 6px;
+  }
+
+  .hut-sheet-body {
+    display: flex;
+    flex-direction: column;
+    height: var(--sheet-content-h, 42dvh);
+    min-height: 0;
+    overflow: hidden;
+    transition: height 0.25s ease;
+  }
+
+  .hut-sheet-body--dragging {
+    transition: none;
   }
 
   .hut-panels-column .hut-panel {
@@ -381,7 +424,7 @@ button.hut-panel__chrome:focus-visible {
 
   .hut-panels {
     gap: 0;
-    flex: 0 1 auto;
+    flex: 1 1 auto;
   }
 
   /* the tabs replace the per-panel headers */
@@ -396,8 +439,8 @@ button.hut-panel__chrome:focus-visible {
   .hut-panel--filters:not(.hut-panel--collapsed),
   .hut-panel--results:not(.hut-panel--collapsed),
   .hut-panel--legend:not(.hut-panel--collapsed) {
-    flex: 0 1 auto;
-    height: 42dvh;
+    flex: 1 1 auto;
+    height: auto;
     max-height: none;
     border-top: 1px solid var(--border);
     padding-top: 8px;
@@ -420,7 +463,8 @@ button.hut-panel__chrome:focus-visible {
   }
 
   .hut-panel--detail {
-    max-height: 52dvh;
+    flex: 1 1 auto;
+    max-height: none;
     border-top: 1px solid var(--border);
   }
 
@@ -430,7 +474,8 @@ button.hut-panel__chrome:focus-visible {
 }
 
 @media (max-width: 640px) and (prefers-reduced-motion: reduce) {
-  .hut-tabs__tab--hut {
+  .hut-tabs__tab--hut,
+  .hut-sheet-body {
     transition: none;
   }
 }
