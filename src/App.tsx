@@ -25,7 +25,7 @@ import { usePanelInsets } from './map/usePanelInsets';
 import { HutViewerLogo } from './brand/HutViewerLogo';
 import { MOBILE_QUERY, useMediaQuery } from './useMediaQuery';
 
-type MobileTab = 'filters' | 'results' | 'legend';
+type MobileTab = 'filters' | 'results' | 'legend' | 'hut';
 
 const Chevron = () => (
   <svg className="hut-panel__chevron" viewBox="0 0 16 16" width="14" height="14" aria-hidden focusable="false">
@@ -115,6 +115,10 @@ function App() {
     [huts, selectedHutId]
   );
 
+  // the hut tab keeps its last label while it animates closed
+  const [tabHut, setTabHut] = useState<HutType | null>(null);
+  if (selectedHut && selectedHut !== tabHut) setTabHut(selectedHut);
+
   const requestMapFocus = useCallback((hut: HutType, keepZoom: boolean) => {
     setMapFocus((prev) => ({ hut, keepZoom, nonce: (prev?.nonce ?? 0) + 1 }));
   }, []);
@@ -122,8 +126,11 @@ function App() {
   const handleSelectHut = useCallback(
     (hut: HutType) => {
       setSelectedHutId(hut.id);
-      // on a phone the detail sheet covers the lower half; keep the hut in view above it
-      if (isMobile) requestMapFocus(hut, true);
+      // on a phone the hut tab covers the lower half; keep the hut in view above it
+      if (isMobile) {
+        setMobileTab('hut');
+        requestMapFocus(hut, true);
+      }
     },
     [isMobile, requestMapFocus]
   );
@@ -132,6 +139,7 @@ function App() {
     (hut: HutType) => {
       flushSync(() => {
         setSelectedHutId(hut.id);
+        if (isMobile) setMobileTab('hut');
       });
 
       if (isMobile) {
@@ -153,7 +161,10 @@ function App() {
 
   const handleShowHutOnMap = useCallback(
     (hut: HutType) => {
-      if (isMobile) setSelectedHutId(hut.id);
+      if (isMobile) {
+        setSelectedHutId(hut.id);
+        setMobileTab('hut');
+      }
       requestMapFocus(hut, false);
     },
     [isMobile, requestMapFocus]
@@ -161,12 +172,14 @@ function App() {
 
   const handleCloseHutDetails = useCallback(() => {
     setSelectedHutId(null);
+    setMobileTab((current) => (current === 'hut' ? 'results' : current));
   }, []);
 
   const handleMobileTab = useCallback((tab: MobileTab) => {
-    setSelectedHutId(null);
     setMobileTab((current) => (current === tab ? null : tab));
   }, []);
+
+  const showHutDetail = isMobile ? mobileTab === 'hut' : selectedHut !== null;
 
   const filtersExpanded = isMobile ? mobileTab === 'filters' : filtersOpen;
   const resultsExpanded = isMobile ? mobileTab === 'results' : resultsOpen;
@@ -225,7 +238,7 @@ function App() {
           </div>
         )}
         <div
-          className={`hut-panels-column${selectedHut ? ' hut-panels-column--detail' : ''}`}
+          className={`hut-panels-column${showHutDetail ? ' hut-panels-column--detail' : ''}`}
           ref={panelsRef}
         >
           <header className="hut-panel hut-brand">
@@ -257,7 +270,7 @@ function App() {
                 aria-selected={mobileTab === 'results'}
                 onClick={() => handleMobileTab('results')}
               >
-                Results {resultsCount}
+                Results <span className="hut-tabs__count">{filteredHuts.length}</span>
               </button>
               <button
                 type="button"
@@ -267,6 +280,18 @@ function App() {
                 onClick={() => handleMobileTab('legend')}
               >
                 Legend
+              </button>
+              <button
+                type="button"
+                role="tab"
+                className={`hut-tabs__tab hut-tabs__tab--hut${selectedHut ? ' hut-tabs__tab--shown' : ''}`}
+                aria-selected={mobileTab === 'hut'}
+                aria-hidden={!selectedHut}
+                tabIndex={selectedHut ? 0 : -1}
+                title={tabHut?.geographical_name}
+                onClick={() => handleMobileTab('hut')}
+              >
+                <span className="hut-tabs__label">{tabHut?.geographical_name}</span>
               </button>
             </div>
           </header>
@@ -349,7 +374,7 @@ function App() {
             )}
           </div>
           <HutDetailAsidePanel
-            hut={selectedHut}
+            hut={showHutDetail ? selectedHut : null}
             availabilityByHutId={availabilityByHutId}
             availabilityDate={filters.availabilityDate}
             onClose={handleCloseHutDetails}
