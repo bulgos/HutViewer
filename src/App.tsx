@@ -1,4 +1,4 @@
-import { startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { startTransition, useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { flushSync } from 'react-dom';
 import './App.css';
 import { MapContainer, TileLayer } from 'react-leaflet';
@@ -20,12 +20,13 @@ import { AreaSelector } from './map/AreaSelector';
 import { HutMapMarkers } from './map/HutMapMarkers';
 import { MapFlyToHut, type MapFocusRequest } from './map/MapFlyToHut';
 import { MapInitialView } from './map/MapInitialView';
-import { MapMarkerLegend } from './map/MapMarkerLegend';
+import { MapLegendBody, MapMarkerLegend } from './map/MapMarkerLegend';
 import { usePanelInsets } from './map/usePanelInsets';
+import { useSheetSnap } from './map/useSheetSnap';
 import { HutViewerLogo } from './brand/HutViewerLogo';
 import { MOBILE_QUERY, useMediaQuery } from './useMediaQuery';
 
-type MobileTab = 'filters' | 'results';
+type MobileTab = 'filters' | 'results' | 'legend' | 'hut';
 
 const Chevron = () => (
   <svg className="hut-panel__chevron" viewBox="0 0 16 16" width="14" height="14" aria-hidden focusable="false">
@@ -41,7 +42,7 @@ function App() {
   const [selectedHutId, setSelectedHutId] = useState<number | null>(null);
   const [resultsOpen, setResultsOpen] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(true);
-  const [mobileTab, setMobileTab] = useState<MobileTab | null>('results');
+  const [mobileTab, setMobileTab] = useState<MobileTab>('results');
   const [mapFocus, setMapFocus] = useState<MapFocusRequest | null>(null);
   const isMobile = useMediaQuery(MOBILE_QUERY);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
@@ -57,7 +58,10 @@ function App() {
   useFilterUrlSync(filters, setFiltersTransition);
 
   const panelsRef = useRef<HTMLDivElement>(null);
-  const getInsets = usePanelInsets(panelsRef, isMobile);
+  const sheetHeaderRef = useRef<HTMLDivElement>(null);
+  const sheet = useSheetSnap(sheetHeaderRef);
+  const { setSnap: setSheetSnap } = sheet;
+  const getInsets = usePanelInsets(panelsRef, isMobile, sheet.getSettledHeight);
 
   const hutsBeforeAvailability = useMemo(() => applyHutFiltersWithoutAvailability(huts, filters), [huts, filters]);
 
@@ -115,6 +119,10 @@ function App() {
     [huts, selectedHutId]
   );
 
+  // the hut tab keeps its last label while it animates closed
+  const [tabHut, setTabHut] = useState<HutType | null>(null);
+  if (selectedHut && selectedHut !== tabHut) setTabHut(selectedHut);
+
   const requestMapFocus = useCallback((hut: HutType, keepZoom: boolean) => {
     setMapFocus((prev) => ({ hut, keepZoom, nonce: (prev?.nonce ?? 0) + 1 }));
   }, []);
@@ -122,16 +130,24 @@ function App() {
   const handleSelectHut = useCallback(
     (hut: HutType) => {
       setSelectedHutId(hut.id);
-      // on a phone the detail sheet covers the lower half; keep the hut in view above it
-      if (isMobile) requestMapFocus(hut, true);
+      // on a phone the hut tab covers the lower half; keep the hut in view above it
+      if (isMobile) {
+        setMobileTab('hut');
+        setSheetSnap('middle');
+        requestMapFocus(hut, true);
+      }
     },
-    [isMobile, requestMapFocus]
+    [isMobile, requestMapFocus, setSheetSnap]
   );
 
   const handleMarkerSelect = useCallback(
     (hut: HutType) => {
       flushSync(() => {
         setSelectedHutId(hut.id);
+        if (isMobile) {
+          setMobileTab('hut');
+          setSheetSnap('middle');
+        }
       });
 
       if (isMobile) {
@@ -148,25 +164,40 @@ function App() {
         });
       });
     },
-    [isMobile, resultsOpen, requestMapFocus]
+    [isMobile, resultsOpen, requestMapFocus, setSheetSnap]
   );
 
   const handleShowHutOnMap = useCallback(
     (hut: HutType) => {
-      if (isMobile) setSelectedHutId(hut.id);
+      if (isMobile) {
+        setSelectedHutId(hut.id);
+        setMobileTab('hut');
+        setSheetSnap('middle');
+      }
       requestMapFocus(hut, false);
     },
-    [isMobile, requestMapFocus]
+    [isMobile, requestMapFocus, setSheetSnap]
   );
 
   const handleCloseHutDetails = useCallback(() => {
     setSelectedHutId(null);
+    setMobileTab((current) => (current === 'hut' ? 'results' : current));
   }, []);
 
-  const handleMobileTab = useCallback((tab: MobileTab) => {
-    setSelectedHutId(null);
-    setMobileTab((current) => (current === tab ? null : tab));
-  }, []);
+  // a tab opens the sheet to half height; the active tab again lowers it
+  const handleMobileTab = useCallback(
+    (tab: MobileTab) => {
+      if (tab === mobileTab && sheet.snap !== 'bottom') {
+        setSheetSnap('bottom');
+        return;
+      }
+      setMobileTab(tab);
+      if (sheet.snap === 'bottom') setSheetSnap('middle');
+    },
+    [mobileTab, sheet.snap, setSheetSnap]
+  );
+
+  const showHutDetail = isMobile ? mobileTab === 'hut' : selectedHut !== null;
 
   const filtersExpanded = isMobile ? mobileTab === 'filters' : filtersOpen;
   const resultsExpanded = isMobile ? mobileTab === 'results' : resultsOpen;
@@ -213,7 +244,7 @@ function App() {
             onMarkerSelect={handleMarkerSelect}
           />
         </MapContainer>
-        <MapMarkerLegend defaultOpen={!isMobile} />
+        {!isMobile && <MapMarkerLegend />}
         {drawAreaActive && (
           <div className="map-draw-hint" role="status">
             Drag on the map to mark the search area
@@ -225,9 +256,19 @@ function App() {
           </div>
         )}
         <div
-          className={`hut-panels-column${selectedHut ? ' hut-panels-column--detail' : ''}`}
+          className={`hut-panels-column${showHutDetail ? ' hut-panels-column--detail' : ''}`}
           ref={panelsRef}
         >
+          <div
+            className="hut-sheet-header"
+            ref={sheetHeaderRef}
+            {...(isMobile ? sheet.dragHandlers : {})}
+          >
+          <button
+            type="button"
+            className="hut-sheet-handle"
+            aria-label={`Sheet height: ${sheet.snap}. Tap to change.`}
+          />
           <header className="hut-panel hut-brand">
             <div className="hut-brand__row">
               <HutViewerLogo className="hut-brand__logo" size={22} />
@@ -257,10 +298,36 @@ function App() {
                 aria-selected={mobileTab === 'results'}
                 onClick={() => handleMobileTab('results')}
               >
-                Results {resultsCount}
+                Results <span className="hut-tabs__count">{filteredHuts.length}</span>
+              </button>
+              <button
+                type="button"
+                role="tab"
+                className="hut-tabs__tab"
+                aria-selected={mobileTab === 'legend'}
+                onClick={() => handleMobileTab('legend')}
+              >
+                Legend
+              </button>
+              <button
+                type="button"
+                role="tab"
+                className={`hut-tabs__tab hut-tabs__tab--hut${selectedHut ? ' hut-tabs__tab--shown' : ''}`}
+                aria-selected={mobileTab === 'hut'}
+                aria-hidden={!selectedHut}
+                tabIndex={selectedHut ? 0 : -1}
+                title={tabHut?.geographical_name}
+                onClick={() => handleMobileTab('hut')}
+              >
+                <span className="hut-tabs__label">{tabHut?.geographical_name}</span>
               </button>
             </div>
           </header>
+          </div>
+          <div
+            className={`hut-sheet-body${sheet.dragging ? ' hut-sheet-body--dragging' : ''}`}
+            style={isMobile ? ({ '--sheet-content-h': `${sheet.contentHeight}px` } as CSSProperties) : undefined}
+          >
           <div className="hut-panels">
             <aside
               className={`hut-panel hut-panel--filters${filtersExpanded ? '' : ' hut-panel--collapsed'}`}
@@ -285,7 +352,7 @@ function App() {
                       setAreaDrawHint(null);
                       setDrawAreaActive((v) => {
                         // on a phone, get the sheet out of the way while drawing
-                        if (!v && isMobile) setMobileTab(null);
+                        if (!v && isMobile) setSheetSnap('bottom');
                         return !v;
                       });
                     }}
@@ -326,13 +393,26 @@ function App() {
                 </div>
               </div>
             </aside>
+            {isMobile && (
+              <aside
+                className={`hut-panel hut-panel--legend${mobileTab === 'legend' ? '' : ' hut-panel--collapsed'}`}
+                aria-label="Map legend"
+              >
+                <div className="hut-panel__expandable">
+                  <div className="hut-panel__expandable-inner hut-filters map-legend__body">
+                    <MapLegendBody />
+                  </div>
+                </div>
+              </aside>
+            )}
           </div>
           <HutDetailAsidePanel
-            hut={selectedHut}
+            hut={showHutDetail ? selectedHut : null}
             availabilityByHutId={availabilityByHutId}
             availabilityDate={filters.availabilityDate}
             onClose={handleCloseHutDetails}
           />
+          </div>
         </div>
       </section>
     </HutHoverProvider>
